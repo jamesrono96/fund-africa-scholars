@@ -7,7 +7,7 @@ $("year").textContent=new Date().getFullYear();
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeArray(value){try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch{return [];}}
 function render(items, rootId="results", countId="count"){
- const root=$(rootId);root.replaceChildren();if(countId)$.textContent=items.length+" opportunities";
+ const root=$(rootId);root.replaceChildren();if(countId)$(countId).textContent=items.length+" opportunities";
  if(!items.length){root.append(node("div","No verified scholarships match these filters yet. Try another search later.","empty"));return;}
  for(const item of items){
   const card=node("article",undefined,"card");
