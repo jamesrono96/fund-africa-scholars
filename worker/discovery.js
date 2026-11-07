@@ -126,17 +126,43 @@ function metaContent(html, key) {
   return first?decodeText(first[1]):"";
 }
 function extractScholarshipFields(html, candidate) {
-  const text=htmlText(html).slice(0,18000);
-  const titleMatch=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const pageText=htmlText(html).slice(0,18000);
+  const titleMatch=html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);
   const pageTitle=titleMatch?decodeText(titleMatch[1]):"";
   const description=metaContent(html,"description")||metaContent(html,"og:description");
-  const fundingMatches=[...text.matchAll(/(?:fully funded|full scholarship|tuition fee(?:s)?|tuition waiver|living stipend|monthly stipend|travel allowance|accommodation|partially funded)/gi)].slice(0,12).map(m=>m[0]);
-  const levelMatches=[...new Set((text.match(/\b(?:undergraduate|bachelor'?s?|master'?s?|postgraduate|doctoral|PhD|doctorate|postdoctoral)\b/gi)||[]).map(v=>v.toLowerCase()))].slice(0,10);
-  const eligibility=[];
-  for(const match of text.matchAll(/.{0,100}\b(?:eligible|eligibility|applicants? must|citizens? of|nationality|minimum requirement|must have)\b.{0,180}/gi)){eligibility.push(match[0].trim());if(eligibility.length>=8)break;}
-  const dateMatches=[...text.matchAll(/\b(?:deadline|apply by|applications close|closing date)\b[^.\n]{0,90}/gi)].slice(0,8).map(m=>m[0].trim());
-  const isoDates=[...new Set((text.match(/\b20\d{2}-\d{2}-\d{2}\b/g)||[]))].slice(0,10);
-  return {page_title:pageTitle||candidate.title,description,funding_phrases:[...new Set(fundingMatches)],study_level_mentions:levelMatches,eligibility_snippets:eligibility,deadline_text:dateMatches,dates_found:isoDates,extraction_method:"rule_based_html_review_assist",requires_human_verification:true};
+
+  // Every suggestion carries a short excerpt from the fetched official page.
+  // Confidence is a rule-based review priority, not a probability of truth.
+  function evidenceMatches(pattern, limit, confidence, reason) {
+    const found=[];
+    for(const match of pageText.matchAll(pattern)){
+      const value=match[0].trim().replace(/\\s+/g," ");
+      const before=pageText.slice(Math.max(0,match.index-110),match.index);
+      const after=pageText.slice(match.index+match[0].length,match.index+match[0].length+110);
+      found.push({value,evidence:(before+value+after).trim().slice(0,260),confidence,confidence_basis:reason});
+      if(found.length>=limit)break;
+    }
+    return found;
+  }
+  const funding=evidenceMatches(/(?:fully funded|full scholarship|tuition fee(?:s)?|tuition waiver|living stipend|monthly stipend|travel allowance|accommodation|partially funded)/gi,12,"medium","Explicit funding phrase found on the page; scope and conditions need human confirmation.");
+  const levels=evidenceMatches(/\\b(?:undergraduate|bachelor'?s?|master'?s?|postgraduate|doctoral|PhD|doctorate|postdoctoral)\\b/gi,12,"medium","Study-level term found; confirm the programme and eligible intake.");
+  const eligibility=evidenceMatches(/.{0,100}\\b(?:eligible|eligibility|applicants? must|citizens? of|nationality|minimum requirement|must have)\\b.{0,180}/gi,8,"low","Eligibility wording is contextual and may include exclusions or conditions; inspect the full official section.");
+  const deadlines=evidenceMatches(/\\b(?:application )?deadline\\b[^.\\n]{0,120}|\\bapply by\\b[^.\\n]{0,120}|\\bapplications close\\b[^.\\n]{0,120}|\\bclosing date\\b[^.\\n]{0,120}/gi,8,"low","Deadline wording found, but the associated date and time zone must be confirmed manually.");
+  const dateEvidence=evidenceMatches(/\\b20\\d{2}-\\d{2}-\\d{2}\\b/g,12,"low","Date-shaped text only; it is not assumed to be an application deadline.");
+  const isoDates=[...new Set(dateEvidence.map(item=>item.value))];
+  return {
+    page_title:pageTitle||candidate.title,
+    description,
+    funding_phrases:[...new Set(funding.map(item=>item.value))],
+    study_level_mentions:[...new Set(levels.map(item=>item.value.toLowerCase()))],
+    eligibility_snippets:eligibility.map(item=>item.value),
+    deadline_text:deadlines.map(item=>item.value),
+    dates_found:isoDates,
+    structured_suggestions:{funding,study_levels:levels,eligibility,deadline_phrases:deadlines,date_strings:dateEvidence},
+    confidence_guide:{high:"Not assigned automatically. Requires explicit, unambiguous source wording and human confirmation.",medium:"A relevant phrase was found; context and conditions still need checking.",low:"A weak or ambiguous clue; do not copy into a published record without further evidence."},
+    extraction_method:"rule_based_evidence_assisted_review",
+    requires_human_verification:true
+  };
 }
 async function extractCandidate(candidateId, db, adminId) {
   const candidate=await db.prepare("SELECT c.*,s.official_domain FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id WHERE c.id=?").bind(candidateId).first();
