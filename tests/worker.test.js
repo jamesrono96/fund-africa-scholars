@@ -270,3 +270,25 @@ test("student profile updates require the configured application origin", async 
   assert.equal(response.status, 403);
   assert.equal(db.statements.some(item => item.sql.includes("UPDATE users")), false);
 });
+
+
+test("student recommendations are private and limited to preferred verified destinations", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/recommendations", "GET"), {
+    DB: db, APP_ORIGIN: "https://app.example.test"
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.deepEqual(data.scholarships, []);
+  assert.ok(db.statements.some(item =>
+    item.sql.includes("destination_country IN (SELECT value FROM json_each(?))") &&
+    item.sql.includes("publication_status = 'published'") &&
+    item.sql.includes("verification_status = 'verified'") &&
+    item.values[0] === "[]"
+  ));
+});
+
+test("student recommendations require an authenticated session", async () => {
+  const response = await worker.fetch(request("/api/student/recommendations"), { DB: new MockD1() });
+  assert.equal(response.status, 401);
+});
