@@ -185,6 +185,21 @@ export async function handleDiscovery(request, env, url) {
   }
 
   const match = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})$/i);
+  const draftMatch = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/create-draft$/i);
+  if (draftMatch && request.method === "POST") {
+    const candidate = await env.DB.prepare("SELECT * FROM scholarship_candidates WHERE id = ?").bind(draftMatch[1]).first();
+    if (!candidate) return json({ error: "Candidate not found." }, 404);
+    if (candidate.review_status !== "accepted") return json({ error: "Review and accept this candidate before creating a draft." }, 409);
+    if (candidate.scholarship_id) return json({ error: "A scholarship draft already exists for this candidate.", scholarship_id: candidate.scholarship_id }, 409);
+    const id = crypto.randomUUID();
+    const eligibility = "NOT VERIFIED — administrator must confirm eligibility details from the official source before publication.";
+    await env.DB.prepare("INSERT INTO scholarships (id,title,provider,destination_country,study_levels,subject_areas,funding_type,funding_details,eligibility_summary,application_deadline,official_url,source_checked_at,verification_status,publication_status,created_by,updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'pending','draft',?,?)")
+      .bind(id,candidate.title,candidate.provider,candidate.destination_country || "To be confirmed","[]","[]","unspecified","",eligibility,candidate.application_deadline,candidate.official_url,new Date().toISOString().slice(0,10),admin.id,admin.id).run();
+    await env.DB.prepare("UPDATE scholarship_candidates SET scholarship_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(id,candidate.id).run();
+    await audit(env.DB,admin.id,"discovery.candidate_converted_to_draft","scholarship",id,{candidate_id:candidate.id});
+    return json({ id, candidate_id:candidate.id, verification_status:"pending", publication_status:"draft", message:"Draft created. Verify every field from the official source before publication." },201);
+  }
+
   if (match && request.method === "PATCH") {
     const parsed = await readBody(request); if (parsed.error) return json({ error: parsed.error }, 400);
     const status = parsed.body.review_status, notes = clean(parsed.body.review_notes,2000);
