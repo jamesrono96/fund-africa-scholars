@@ -82,17 +82,21 @@ test("unsupported public study-level filters are rejected", async () => {
 test("publishing requires a previously saved verified state", async () => {
   class AdminMockD1 extends MockD1 {
     prepare(sql) {
-      const base = super.prepare(sql);
-      return {
-        ...base,
+      const statement = { sql, values: [] };
+      this.statements.push(statement);
+      const prepared = {
+        bind: (...values) => { statement.values = values; return prepared; },
         first: async () => {
           if (sql.includes("FROM sessions JOIN users")) return { id: "admin-1", role: "admin" };
           if (sql.includes("SELECT id,verification_status,publication_status")) {
             return { id: "123e4567-e89b-12d3-a456-426614174000", verification_status: "pending", publication_status: "draft" };
           }
           return null;
-        }
+        },
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 0 } })
       };
+      return prepared;
     }
   }
   const token = "test-session-token";
@@ -112,9 +116,10 @@ test("publishing requires a previously saved verified state", async () => {
 test("changing an official source requires resetting verification and publication", async () => {
   class AdminMockD1 extends MockD1 {
     prepare(sql) {
-      const base = super.prepare(sql);
-      return {
-        ...base,
+      const statement = { sql, values: [] };
+      this.statements.push(statement);
+      const prepared = {
+        bind: (...values) => { statement.values = values; return prepared; },
         first: async () => {
           if (sql.includes("FROM sessions JOIN users")) return { id: "admin-1", role: "admin" };
           if (sql.includes("SELECT id,verification_status,publication_status")) {
@@ -122,8 +127,11 @@ test("changing an official source requires resetting verification and publicatio
           }
           if (sql.includes("SELECT official_url FROM scholarships")) return { official_url: "https://old.example.org/scholarships" };
           return null;
-        }
+        },
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 0 } })
       };
+      return prepared;
     }
   }
   const response = await worker.fetch(request("/api/admin/scholarships/123e4567-e89b-12d3-a456-426614174000", {
