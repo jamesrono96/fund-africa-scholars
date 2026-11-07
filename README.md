@@ -41,6 +41,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - `db/migrations/0006_candidate_field_reviews.sql` — append-only administrator decisions on individual extracted fields
 - `db/migrations/0007_scholarship_verification_checklist.sql` — evidence-backed scholarship-level verification checklist
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
+- `.github/workflows/validate.yml` — GitHub Actions JavaScript syntax and SQLite migration checks
 - `wrangler.toml` — local/deployment configuration template (not deployed)
 - `docs/ROADMAP.md` — build sequence and completion criteria
 
@@ -98,3 +99,7 @@ The candidate queue now supports individual approve/reject decisions for rule-ba
 ### Scholarship-level verification gate
 
 The admin scholarship records now include a seven-item checklist covering official source identity, current intake, eligible nationalities, study level, funding terms, application deadline and application route. Every item requires an HTTPS evidence URL on the scholarship's official hostname and an evidence excerpt. The API blocks marking a scholarship verified or publishing it until all seven items are confirmed or explicitly marked not applicable. A checklist item marked needs follow-up automatically returns the scholarship to needs-review and draft status. Apply migration `0007_scholarship_verification_checklist.sql` after migration 0006.
+
+### Automated repository checks
+
+GitHub Actions now runs JavaScript syntax checks for Worker and browser scripts, then applies the initial SQLite schema and migrations 0002 and 0004–0007 to an in-memory database and checks referential integrity. This validates syntax and migration compatibility; it is not an end-to-end test of the Worker against a configured Cloudflare D1 instance.
