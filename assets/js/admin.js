@@ -53,7 +53,7 @@ async function archiveRecord(id){
 }
 $("login-form").addEventListener("submit",async event=>{
  event.preventDefault();if(!API_BASE){msg("login-message","Admin sign-in is not active until the backend is configured.","error");return;}
- try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecords();}
+ try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();}
  catch(error){msg("login-message",error.message,"error");}
 });
 form.addEventListener("submit",async event=>{
@@ -89,5 +89,4 @@ $("candidate-filter").addEventListener("change",loadCandidates);
 
 const originalLoadRecords=loadRecords;
 const loadRecordsWithDiscovery=async()=>{await originalLoadRecords();await loadSources();await loadCandidates();};
-$("login-form").addEventListener("submit",()=>{});
 })();
