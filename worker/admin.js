@@ -123,12 +123,35 @@ export async function handleAdmin(request, env, url) {
     const d = checked.value;
     const verification = d.verification_status || "pending";
     const publication = d.publication_status || "draft";
-    if (publication === "published" && verification !== "verified") return json({ error: "Only verified scholarships can be published." }, 400);
+    if (verification === "verified" || publication === "published") return json({ error: "Create the scholarship as a draft first, then complete all seven evidence-backed verification checklist items before marking it verified or publishing it." }, 400);
     const id = crypto.randomUUID();
     await env.DB.prepare("INSERT INTO scholarships (id,title,provider,destination_country,study_levels,subject_areas,funding_type,funding_details,eligibility_summary,application_deadline,official_url,source_checked_at,verification_status,publication_status,created_by,updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
       .bind(id,d.title,d.provider,d.destination_country,d.study_levels,d.subject_areas,d.funding_type,d.funding_details,d.eligibility_summary,d.application_deadline,d.official_url,d.source_checked_at,verification,publication,admin.id,admin.id).run();
     await audit(env.DB, admin.id, "scholarship.created", id, Object.keys(d));
     return json({ id, message: "Scholarship created." }, 201);
+  }
+
+  const checklistMatch=url.pathname.match(/^\/api\/admin\/scholarships\/([a-f0-9-]{36})\/verification-checklist$/i);
+  if(checklistMatch && request.method==="GET"){
+    const rows=await env.DB.prepare("SELECT check_key,decision,evidence_url,evidence_excerpt,reviewer_notes,reviewer_id,reviewed_at FROM scholarship_verification_checks WHERE scholarship_id=? ORDER BY check_key").bind(checklistMatch[1]).all();
+    return json({checks:rows.results||[]});
+  }
+  if(checklistMatch && request.method==="POST"){
+    const parsed=await bodyJson(request);if(parsed.error)return json({error:parsed.error},400);
+    const b=parsed.body,key=stringField(b.check_key,40,true),decision=b.decision;
+    const allowed=["official_source","current_intake","eligible_nationalities","study_level","funding_terms","application_deadline","application_route"];
+    if(!allowed.includes(key)||!["confirmed","not_applicable","needs_follow_up"].includes(decision))return json({error:"Choose a valid checklist item and decision."},400);
+    const evidenceUrl=stringField(b.evidence_url,2048,true),excerpt=stringField(b.evidence_excerpt,1200,true),notes=stringField(b.reviewer_notes||"",1200);
+    if(!evidenceUrl||!excerpt||!notes)return json({error:"An evidence URL and excerpt are required for every checklist decision."},400);
+    let source, evidence;
+    try{source=new URL(evidenceUrl);evidence=new URL((await env.DB.prepare("SELECT official_url FROM scholarships WHERE id=?").bind(checklistMatch[1]).first())||{} .official_url);}
+    catch{return json({error:"Invalid scholarship or evidence URL."},400);}
+    if(source.protocol!=="https:"||source.hostname.toLowerCase()!==evidence.hostname.toLowerCase())return json({error:"Evidence must come from the scholarship's official HTTPS domain."},400);
+    const id=crypto.randomUUID();
+    await env.DB.prepare("INSERT INTO scholarship_verification_checks (id,scholarship_id,check_key,decision,evidence_url,evidence_excerpt,reviewer_notes,reviewer_id) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(scholarship_id,check_key) DO UPDATE SET decision=excluded.decision,evidence_url=excluded.evidence_url,evidence_excerpt=excluded.evidence_excerpt,reviewer_notes=excluded.reviewer_notes,reviewer_id=excluded.reviewer_id,reviewed_at=CURRENT_TIMESTAMP")
+      .bind(id,checklistMatch[1],key,decision,source.href,excerpt,notes,admin.id).run();
+    await audit(env.DB,admin.id,"scholarship.verification_check_saved",checklistMatch[1],{check_key:key,decision});
+    return json({message:"Verification checklist item saved."},201);
   }
 
   const match = url.pathname.match(/^\/api\/admin\/scholarships\/([a-f0-9-]{36})$/i);
@@ -145,7 +168,11 @@ export async function handleAdmin(request, env, url) {
     if (!old) return json({ error: "Scholarship not found." }, 404);
     const verification = d.verification_status ?? old.verification_status;
     const publication = d.publication_status ?? old.publication_status;
-    if (publication === "published" && verification !== "verified") return json({ error: "Only verified scholarships can be published." }, 400);
+    if (verification === "verified" || publication === "published") {
+      const checklist=await env.DB.prepare("SELECT COUNT(*) AS total FROM scholarship_verification_checks WHERE scholarship_id=? AND decision IN ('confirmed','not_applicable') AND evidence_excerpt<>'' AND evidence_url<>''").bind(id).first();
+      if(Number(checklist?.total||0)!==7)return json({error:"All seven evidence-backed verification checklist items must be confirmed or marked not applicable before verification or publication."},400);
+      if(verification!=="verified")return json({error:"A scholarship must be marked verified before publication."},400);
+    }
     const fields = Object.keys(d);
     if (!fields.length) return json({ error: "No valid fields supplied." }, 400);
     const assignments = fields.map(field => field + " = ?").join(", ");
