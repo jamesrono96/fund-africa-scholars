@@ -6,7 +6,8 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 - [x] Create repository and initial landing page
 - [x] Define initial data model and API foundation
-- [ ] Establish frontend component structure and design system
+- [x] Add student account page and frontend sign-in/registration interactions (API connection pending)
+- [ ] Establish reusable frontend component structure and design system
 - [ ] Add accessibility, responsive-layout and form-validation checks
 
 ## Phase 2 — Scholarship directory
@@ -22,8 +23,13 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 ## Phase 3 — Student accounts
 
-- [ ] Registration and login
-- [ ] Secure password hashing and session lifecycle
+- [x] Registration and login API foundation
+- [x] Password hashing and HTTP-only session cookie foundation
+- [x] Logout and current-session endpoint
+- [x] Basic login/registration rate-limit foundation
+- [ ] Apply migration and configure a development database
+- [ ] Email verification and password reset
+- [ ] Add CSRF protections and production security review
 - [ ] Email verification and password reset
 - [ ] Student profile and preferences
 - [ ] Saved scholarships and application tracker
