@@ -78,7 +78,9 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Discovery run history and scan result audit trail
 - [ ] Scheduled discovery jobs
 - [ ] Duplicate detection
-- [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder\n- [ ] Extract eligibility, funding and deadline fields
+- [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder
+- [x] Rule-based official-page extraction suggestions for eligibility, funding, study levels and deadline clues (manual review required)
+- [ ] AI-assisted structured extraction with source citations and confidence scoring
 - [ ] Track last checked date and source changes
 - [ ] Human approval for uncertain or changed records
 - [ ] Notifications for saved opportunities and approaching deadlines
