@@ -30,6 +30,12 @@ function corsHeaders(request, env) {
   };
 }
 
+function withCors(response, cors) {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(cors)) headers.set(key, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function isAllowedOrigin(request, env) {
   const origin = request.headers.get("Origin");
   return Boolean(env.APP_ORIGIN && origin === env.APP_ORIGIN);
@@ -279,20 +285,17 @@ export default {
 
       if (url.pathname === "/api/auth/register" && request.method === "POST") {
         const response = await authRegister(request, env);
-        for (const [key, value] of cors.entries()) response.headers.set(key, value);
-        return response;
+        return withCors(response, cors);
       }
 
       if (url.pathname === "/api/auth/login" && request.method === "POST") {
         const response = await authLogin(request, env);
-        for (const [key, value] of cors.entries()) response.headers.set(key, value);
-        return response;
+        return withCors(response, cors);
       }
 
       if (url.pathname === "/api/auth/logout" && request.method === "POST") {
         const response = await authLogout(request, env);
-        for (const [key, value] of cors.entries()) response.headers.set(key, value);
-        return response;
+        return withCors(response, cors);
       }
 
       if (url.pathname === "/api/auth/me" && request.method === "GET") {
