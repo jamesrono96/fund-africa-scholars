@@ -1,5 +1,6 @@
 import { handleAdmin } from "./admin.js";
 import { handleStudent } from "./student.js";
+import { handleDiscovery } from "./discovery.js";
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -308,6 +309,11 @@ export default {
 
       if (url.pathname.startsWith("/api/student/")) {
         const response = await handleStudent(request, env, url);
+        return withCors(response, cors);
+      }
+
+      if (url.pathname.startsWith("/api/admin/discovery/")) {
+        const response = await handleDiscovery(request, env, url);
         return withCors(response, cors);
       }
 
