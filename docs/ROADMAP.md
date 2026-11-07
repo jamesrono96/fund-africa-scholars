@@ -81,7 +81,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder
 - [x] Rule-based official-page extraction suggestions for eligibility, funding, study levels and deadline clues (manual review required)
 - [ ] AI-assisted structured extraction with source citations and confidence scoring
-- [ ] Track last checked date and source changes
+- [x] Track candidate-page snapshots, last checked date and source changes (manual checks)\n- [x] Move changed candidates to human review and expose snapshot history
 - [ ] Human approval for uncertain or changed records
 - [ ] Notifications for saved opportunities and approaching deadlines
 
