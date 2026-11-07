@@ -70,4 +70,24 @@ $("logout-button").addEventListener("click",async()=>{
  adminPanel.classList.add("hidden");loginPanel.classList.remove("hidden");$("password").value="";msg("login-message","Signed out.");
 });
 clearForm();
+
+async function loadSources(){
+ if(!API_BASE){msg("source-message","Preview only: backend is not configured.");return;}
+ try{const data=await api("/api/admin/discovery/sources");const body=$("sources");body.replaceChildren();for(const s of data.sources||[]){const tr=document.createElement("tr");for(const value of [s.name,s.official_domain,s.source_type,s.country,s.last_checked_at])tr.append(cell(value));body.append(tr);}msg("source-message",(data.sources||[]).length+" source(s) registered.","success");}
+ catch(error){msg("source-message",error.message,"error");}
+}
+async function loadCandidates(){
+ if(!API_BASE){msg("candidate-message","Preview only: backend is not configured.");return;}
+ const status=$("candidate-filter").value;const query=status?"?status="+encodeURIComponent(status):"";
+ try{const data=await api("/api/admin/discovery/candidates"+query);const body=$("candidates");body.replaceChildren();for(const c of data.candidates||[]){const tr=document.createElement("tr");tr.append(cell(c.title+" · "+c.provider),cell(c.source_name),cell(c.application_deadline));const linkCell=cell("");const link=document.createElement("a");link.href=c.official_url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open official page";linkCell.append(link);tr.append(linkCell);const review=cell("");const select=document.createElement("select");for(const [value,label] of [["pending","Pending"],["needs_review","Needs review"],["accepted","Accepted"],["rejected","Rejected"],["duplicate","Duplicate"]]){const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);}select.value=c.review_status;select.addEventListener("change",async()=>{try{await api("/api/admin/discovery/candidates/"+c.id,{method:"PATCH",body:{review_status:select.value,review_notes:c.review_notes||""}});msg("candidate-message","Review status updated. No public listing was created.","success");}catch(error){msg("candidate-message",error.message,"error");select.value=c.review_status;}});review.append(select);tr.append(review);body.append(tr);}msg("candidate-message",(data.candidates||[]).length+" candidate(s) loaded.","success");}
+ catch(error){msg("candidate-message",error.message,"error");}
+}
+$("source-form").addEventListener("submit",async event=>{event.preventDefault();if(!API_BASE){msg("source-message","Registration is disabled until the backend is configured.","error");return;}const button=$("source-save");button.disabled=true;try{const data={name:$("source-name").value,official_domain:$("source-domain").value,source_url:$("source-url").value,source_type:$("source-type").value,country:$("source-country").value,check_frequency_days:Number($("source-frequency").value),notes:$("source-notes").value};await api("/api/admin/discovery/sources",{method:"POST",body:data});event.target.reset();$("source-frequency").value="14";msg("source-message","Official source registered. No scan was started.","success");await loadSources();}catch(error){msg("source-message",error.message,"error");}finally{button.disabled=false;}});
+$("source-refresh").addEventListener("click",loadSources);
+$("candidate-refresh").addEventListener("click",loadCandidates);
+$("candidate-filter").addEventListener("change",loadCandidates);
+
+const originalLoadRecords=loadRecords;
+const loadRecordsWithDiscovery=async()=>{await originalLoadRecords();await loadSources();await loadCandidates();};
+$("login-form").addEventListener("submit",()=>{});
 })();
