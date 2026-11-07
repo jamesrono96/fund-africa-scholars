@@ -127,7 +127,7 @@ function metaContent(html, key) {
 }
 function extractScholarshipFields(html, candidate) {
   const pageText=htmlText(html).slice(0,18000);
-  const titleMatch=html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);
+  const titleMatch=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const pageTitle=titleMatch?decodeText(titleMatch[1]):"";
   const description=metaContent(html,"description")||metaContent(html,"og:description");
 
@@ -136,7 +136,7 @@ function extractScholarshipFields(html, candidate) {
   function evidenceMatches(pattern, limit, confidence, reason) {
     const found=[];
     for(const match of pageText.matchAll(pattern)){
-      const value=match[0].trim().replace(/\\s+/g," ");
+      const value=match[0].trim().replace(/\s+/g," ");
       const before=pageText.slice(Math.max(0,match.index-110),match.index);
       const after=pageText.slice(match.index+match[0].length,match.index+match[0].length+110);
       found.push({value,evidence:(before+value+after).trim().slice(0,260),confidence,confidence_basis:reason});
@@ -145,10 +145,10 @@ function extractScholarshipFields(html, candidate) {
     return found;
   }
   const funding=evidenceMatches(/(?:fully funded|full scholarship|tuition fee(?:s)?|tuition waiver|living stipend|monthly stipend|travel allowance|accommodation|partially funded)/gi,12,"medium","Explicit funding phrase found on the page; scope and conditions need human confirmation.");
-  const levels=evidenceMatches(/\\b(?:undergraduate|bachelor'?s?|master'?s?|postgraduate|doctoral|PhD|doctorate|postdoctoral)\\b/gi,12,"medium","Study-level term found; confirm the programme and eligible intake.");
-  const eligibility=evidenceMatches(/.{0,100}\\b(?:eligible|eligibility|applicants? must|citizens? of|nationality|minimum requirement|must have)\\b.{0,180}/gi,8,"low","Eligibility wording is contextual and may include exclusions or conditions; inspect the full official section.");
-  const deadlines=evidenceMatches(/\\b(?:application )?deadline\\b[^.\\n]{0,120}|\\bapply by\\b[^.\\n]{0,120}|\\bapplications close\\b[^.\\n]{0,120}|\\bclosing date\\b[^.\\n]{0,120}/gi,8,"low","Deadline wording found, but the associated date and time zone must be confirmed manually.");
-  const dateEvidence=evidenceMatches(/\\b20\\d{2}-\\d{2}-\\d{2}\\b/g,12,"low","Date-shaped text only; it is not assumed to be an application deadline.");
+  const levels=evidenceMatches(/\b(?:undergraduate|bachelor'?s?|master'?s?|postgraduate|doctoral|PhD|doctorate|postdoctoral)\b/gi,12,"medium","Study-level term found; confirm the programme and eligible intake.");
+  const eligibility=evidenceMatches(/.{0,100}\b(?:eligible|eligibility|applicants? must|citizens? of|nationality|minimum requirement|must have)\b.{0,180}/gi,8,"low","Eligibility wording is contextual and may include exclusions or conditions; inspect the full official section.");
+  const deadlines=evidenceMatches(/\b(?:application )?deadline\b[^.\n]{0,120}|\bapply by\b[^.\n]{0,120}|\bapplications close\b[^.\n]{0,120}|\bclosing date\b[^.\n]{0,120}/gi,8,"low","Deadline wording found, but the associated date and time zone must be confirmed manually.");
+  const dateEvidence=evidenceMatches(/\b20\d{2}-\d{2}-\d{2}\b/g,12,"low","Date-shaped text only; it is not assumed to be an application deadline.");
   const isoDates=[...new Set(dateEvidence.map(item=>item.value))];
   return {
     page_title:pageTitle||candidate.title,
