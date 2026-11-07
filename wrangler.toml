@@ -1,0 +1,16 @@
+# Configuration template only. This project is not deployed.
+name = "fund-africa-scholars-api"
+main = "worker/index.js"
+compatibility_date = "2026-11-07"
+
+# Create and bind a D1 database only when ready to configure a development environment.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "fund-africa-scholars-dev"
+# database_id = "REPLACE_WITH_DATABASE_ID"
+
+[vars]
+APP_ENV = "development"
+
+# Set APP_ORIGIN and provider credentials as encrypted environment secrets
+# in the deployment environment later. Never commit secrets here.
