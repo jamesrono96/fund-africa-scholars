@@ -97,7 +97,9 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 ## Phase 7 — Quality and release readiness
 
-- [ ] Unit and integration tests
+- [x] GitHub Actions JavaScript syntax checks
+- [x] Automated SQLite schema/migration application and integrity check
+- [ ] Worker/API unit and integration tests against a D1-compatible development environment
 - [ ] Security review and dependency review
 - [ ] Accessibility and mobile checks
 - [ ] Backup and recovery plan
