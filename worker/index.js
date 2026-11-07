@@ -306,7 +306,12 @@ export default {
         return user ? json({ user: publicUser(user) }, 200, cors) : json({ error: "Not signed in." }, 401, cors);
       }
 
-      if (url.pathname.startsWith("/api/student/")) {\n        const response = await handleStudent(request, env, url);\n        return withCors(response, cors);\n      }\n\n      if (url.pathname.startsWith("/api/admin/scholarships")) {
+      if (url.pathname.startsWith("/api/student/")) {
+        const response = await handleStudent(request, env, url);
+        return withCors(response, cors);
+      }
+
+      if (url.pathname.startsWith("/api/admin/scholarships")) {
         const response = await handleAdmin(request, env, url);
         return withCors(response, cors);
       }
