@@ -58,3 +58,8 @@ See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence.
 ## Scholarship discovery foundation
 
 The admin API includes a manual official-source registry and a candidate review queue. Apply `db/migrations/0004_scholarship_discovery.sql` after the earlier migrations before using these endpoints. Discovery candidates are never published automatically; an administrator must verify and separately create/publish a scholarship. Automated crawling, AI extraction, scheduled checks and notifications are not implemented yet.
+
+
+### Manual source checks
+
+An administrator can trigger a check for a registered source. The Worker fetches the registered HTTPS page without following redirects, limits the HTML response size, and only queues matching scholarship-related links on that same official domain. These are link-title candidates, not verified scholarship facts. Every candidate stays private for human review; no scan publishes records. Scheduled scans and AI extraction are not implemented.
