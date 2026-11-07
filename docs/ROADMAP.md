@@ -12,10 +12,13 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 ## Phase 2 — Scholarship directory
 
-- [ ] Scholarship list and detail views
-- [ ] Search by keyword, destination, study level and subject
+- [x] Public scholarship directory page
+- [x] Search by keyword, destination country and study level
+- [x] Scholarship cards showing provider, funding, eligibility, deadline and official source
+- [ ] Individual scholarship detail pages
 - [ ] Filters for funding type, eligibility and deadline
-- [ ] Pagination and empty/loading/error states
+- [x] Loading, empty and error states
+- [ ] Pagination
 - [ ] Official source link, source checked date and verification status
 - [x] Admin review and publication status fields/API foundations
 - [x] Scholarship source URL and source checked date fields
