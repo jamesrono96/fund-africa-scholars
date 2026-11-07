@@ -152,6 +152,10 @@ export async function handleAdmin(request, env, url) {
     const id=crypto.randomUUID();
     await env.DB.prepare("INSERT INTO scholarship_verification_checks (id,scholarship_id,check_key,decision,evidence_url,evidence_excerpt,reviewer_notes,reviewer_id) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(scholarship_id,check_key) DO UPDATE SET decision=excluded.decision,evidence_url=excluded.evidence_url,evidence_excerpt=excluded.evidence_excerpt,reviewer_notes=excluded.reviewer_notes,reviewer_id=excluded.reviewer_id,reviewed_at=CURRENT_TIMESTAMP")
       .bind(id,checklistMatch[1],key,decision,source.href,excerpt,notes,admin.id).run();
+    if(decision==="needs_follow_up"){
+      await env.DB.prepare("UPDATE scholarships SET verification_status='needs_review',publication_status='draft',updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(admin.id,checklistMatch[1]).run();
+      await audit(env.DB,admin.id,"scholarship.verification_revoked_for_follow_up",checklistMatch[1],{check_key:key});
+    }
     await audit(env.DB,admin.id,"scholarship.verification_check_saved",checklistMatch[1],{check_key:key,decision});
     return json({message:"Verification checklist item saved."},201);
   }
