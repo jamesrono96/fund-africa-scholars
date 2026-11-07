@@ -140,7 +140,7 @@ export async function handleAdmin(request, env, url) {
     const parsed=await bodyJson(request);if(parsed.error)return json({error:parsed.error},400);
     const b=parsed.body,key=stringField(b.check_key,40,true),decision=b.decision;
     const allowed=["official_source","current_intake","eligible_nationalities","study_level","funding_terms","application_deadline","application_route"];
-    if(!allowed.includes(key)||!["confirmed","not_applicable","needs_follow_up"].includes(decision))return json({error:"Choose a valid checklist item and decision."},400);
+    if(!allowed.includes(key)||!["confirmed","not_applicable","needs_follow_up"].includes(decision)||(decision==="not_applicable"&&key!=="application_deadline"))return json({error:"Choose a valid checklist decision. Only an unpublished application deadline may be marked not applicable."},400);
     const evidenceUrl=stringField(b.evidence_url,2048,true),excerpt=stringField(b.evidence_excerpt,1200,true),notes=stringField(b.reviewer_notes||"",1200);
     if(!evidenceUrl||!excerpt||!notes)return json({error:"An evidence URL and excerpt are required for every checklist decision."},400);
     const scholarship=await env.DB.prepare("SELECT official_url FROM scholarships WHERE id=?").bind(checklistMatch[1]).first();
