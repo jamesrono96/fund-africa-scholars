@@ -237,8 +237,10 @@ async function aiExtractCandidate(candidateId, env, adminId) {
   const changed=Boolean(previous&&previous.content_hash!==hash),snapshotId=crypto.randomUUID();
   await env.DB.prepare("INSERT INTO candidate_source_snapshots (id,candidate_id,source_id,official_url,content_hash,page_title,description,body_excerpt,change_detected,previous_snapshot_id) VALUES (?,?,?,?,?,?,?,?,?,?)")
     .bind(snapshotId,candidateId,candidate.source_id,candidate.official_url,hash,candidate.title,"AI review fetch",pageText.slice(0,4000),changed?1:0,previous?.id||null).run();
+  let existingExtraction={};
+  try{existingExtraction=JSON.parse(candidate.extracted_data_json||"{}");}catch{}
   await env.DB.prepare("UPDATE scholarship_candidates SET extracted_data_json=?,review_status=CASE WHEN ?=1 AND review_status NOT IN ('rejected','duplicate') THEN 'needs_review' ELSE review_status END,updated_at=CURRENT_TIMESTAMP WHERE id=?")
-    .bind(JSON.stringify({ai_review:extracted}),changed?1:0,candidateId).run();
+    .bind(JSON.stringify({...existingExtraction,ai_review:extracted}),changed?1:0,candidateId).run();
   await audit(env.DB,adminId,"discovery.candidate_ai_extracted","scholarship_candidate",candidateId,{model,source_changed:changed,snapshot_id:snapshotId});
   return {candidate_id:candidateId,extracted,source_changed:changed,message:"AI suggestions saved with exact-quote checks. Verify every item against the official page; nothing was verified or published."};
 }
