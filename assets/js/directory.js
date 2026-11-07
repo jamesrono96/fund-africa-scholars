@@ -12,7 +12,12 @@ function render(items){
  for(const item of items){
   const card=node("article",undefined,"card");
   card.append(node("span",item.funding_type.replaceAll("_"," "),"tag"));
-  card.append(node("h3",item.title));
+  const titleLink=node("a",item.title);
+  titleLink.href="scholarship.html?id="+encodeURIComponent(item.id);
+  titleLink.className="detail-link";
+  const titleHeading=node("h3");
+  titleHeading.append(titleLink);
+  card.append(titleHeading);
   card.append(node("div",item.provider,"provider"));
   const meta=node("div",undefined,"meta");
   const destination=node("div");destination.append(node("strong","DESTINATION"),document.createTextNode(item.destination_country||"Not specified"));
