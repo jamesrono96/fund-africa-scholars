@@ -143,10 +143,12 @@ export async function handleAdmin(request, env, url) {
     if(!allowed.includes(key)||!["confirmed","not_applicable","needs_follow_up"].includes(decision))return json({error:"Choose a valid checklist item and decision."},400);
     const evidenceUrl=stringField(b.evidence_url,2048,true),excerpt=stringField(b.evidence_excerpt,1200,true),notes=stringField(b.reviewer_notes||"",1200);
     if(!evidenceUrl||!excerpt||!notes)return json({error:"An evidence URL and excerpt are required for every checklist decision."},400);
-    let source, evidence;
-    try{source=new URL(evidenceUrl);evidence=new URL((await env.DB.prepare("SELECT official_url FROM scholarships WHERE id=?").bind(checklistMatch[1]).first())||{} .official_url);}
+    const scholarship=await env.DB.prepare("SELECT official_url FROM scholarships WHERE id=?").bind(checklistMatch[1]).first();
+    if(!scholarship)return json({error:"Scholarship not found."},404);
+    let source,evidence;
+    try{source=new URL(evidenceUrl);evidence=new URL(scholarship.official_url);}
     catch{return json({error:"Invalid scholarship or evidence URL."},400);}
-    if(source.protocol!=="https:"||source.hostname.toLowerCase()!==evidence.hostname.toLowerCase())return json({error:"Evidence must come from the scholarship's official HTTPS domain."},400);
+    if(source.protocol!=="https:"||evidence.protocol!=="https:"||source.hostname.toLowerCase()!==evidence.hostname.toLowerCase())return json({error:"Evidence must come from the scholarship's official HTTPS domain."},400);
     const id=crypto.randomUUID();
     await env.DB.prepare("INSERT INTO scholarship_verification_checks (id,scholarship_id,check_key,decision,evidence_url,evidence_excerpt,reviewer_notes,reviewer_id) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(scholarship_id,check_key) DO UPDATE SET decision=excluded.decision,evidence_url=excluded.evidence_url,evidence_excerpt=excluded.evidence_excerpt,reviewer_notes=excluded.reviewer_notes,reviewer_id=excluded.reviewer_id,reviewed_at=CURRENT_TIMESTAMP")
       .bind(id,checklistMatch[1],key,decision,source.href,excerpt,notes,admin.id).run();
