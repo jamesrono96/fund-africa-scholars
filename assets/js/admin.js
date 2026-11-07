@@ -73,9 +73,11 @@ clearForm();
 
 async function loadSources(){
  if(!API_BASE){msg("source-message","Preview only: backend is not configured.");return;}
- try{const data=await api("/api/admin/discovery/sources");const body=$("sources");body.replaceChildren();for(const s of data.sources||[]){const tr=document.createElement("tr");for(const value of [s.name,s.official_domain,s.source_type,s.country,s.last_checked_at])tr.append(cell(value));body.append(tr);}msg("source-message",(data.sources||[]).length+" source(s) registered.","success");}
+ try{const data=await api("/api/admin/discovery/sources");const body=$("sources");body.replaceChildren();for(const s of data.sources||[]){const tr=document.createElement("tr");for(const value of [s.name,s.official_domain,s.source_type,s.country,s.last_checked_at])tr.append(cell(value));const action=cell("");const scan=document.createElement("button");scan.className="btn secondary";scan.type="button";scan.textContent="Check source";scan.addEventListener("click",()=>scanSource(s.id,scan));action.append(scan);tr.append(action);body.append(tr);}msg("source-message",(data.sources||[]).length+" source(s) registered.","success");}
  catch(error){msg("source-message",error.message,"error");}
 }
+async function scanSource(id,button){if(!confirm("Fetch this registered official page now and look for scholarship-related links? Only same-domain links will enter the private review queue."))return;button.disabled=true;button.textContent="Checking…";try{const result=await api("/api/admin/discovery/sources/"+id+"/check",{method:"POST",body:{}});msg("source-message","Scan complete: "+result.candidates_found+" new candidate(s), "+result.duplicates+" duplicate(s). Nothing was published.","success");await loadCandidates();await loadRuns();}catch(error){msg("source-message",error.message,"error");}finally{button.disabled=false;button.textContent="Check source";}}
+async function loadRuns(){if(!API_BASE)return;try{const data=await api("/api/admin/discovery/runs");const body=$("discovery-runs");if(!body)return;body.replaceChildren();for(const run of data.runs||[]){const tr=document.createElement("tr");for(const value of [run.source_name,run.status,run.started_at,run.candidates_found,run.error_summary])tr.append(cell(value));body.append(tr);}}catch(error){msg("candidate-message",error.message,"error");}}
 async function loadCandidates(){
  if(!API_BASE){msg("candidate-message","Preview only: backend is not configured.");return;}
  const status=$("candidate-filter").value;const query=status?"?status="+encodeURIComponent(status):"";
@@ -88,5 +90,5 @@ $("candidate-refresh").addEventListener("click",loadCandidates);
 $("candidate-filter").addEventListener("change",loadCandidates);
 
 const originalLoadRecords=loadRecords;
-const loadRecordsWithDiscovery=async()=>{await originalLoadRecords();await loadSources();await loadCandidates();};
+const loadRecordsWithDiscovery=async()=>{await originalLoadRecords();await loadSources();await loadCandidates();await loadRuns();};
 })();
