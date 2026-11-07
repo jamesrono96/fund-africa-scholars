@@ -334,35 +334,54 @@ export default {
       if (url.pathname === "/api/scholarships" && request.method === "GET") {
         const limitParam = Number.parseInt(url.searchParams.get("limit") || "20", 10);
         const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 50) : 20;
-        const country = url.searchParams.get("country");
-        const level = url.searchParams.get("level");
-        const keyword = url.searchParams.get("q");
+        const filters = {
+          country: url.searchParams.get("country"), level: url.searchParams.get("level"),
+          keyword: url.searchParams.get("q"), subject: url.searchParams.get("subject"),
+          funding: url.searchParams.get("funding"), deadline: url.searchParams.get("deadline"),
+          eligibility: url.searchParams.get("eligibility")
+        };
+        const allowedLevels = new Set(["Undergraduate", "Masters", "PhD", "Postdoctoral", "Diploma", "Certificate"]);
+        const allowedFunding = new Set(["fully_funded", "partially_funded", "tuition_only", "stipend", "unspecified"]);
+        const allowedDeadlines = new Set(["upcoming", "closing_30", "expired", "not_listed"]);
+        if (filters.level && !allowedLevels.has(filters.level)) return json({ error: "Unsupported study level filter." }, 400, cors);
+        if (filters.funding && !allowedFunding.has(filters.funding)) return json({ error: "Unsupported funding filter." }, 400, cors);
+        if (filters.deadline && !allowedDeadlines.has(filters.deadline)) return json({ error: "Unsupported deadline filter." }, 400, cors);
         let query = `
           SELECT id, title, provider, destination_country, study_levels,
-                 subject_areas, funding_type, funding_details,
-                 eligibility_summary, application_deadline, official_url,
-                 source_checked_at
+                 subject_areas, funding_type, funding_details, eligibility_summary,
+                 application_deadline, official_url, source_checked_at
           FROM scholarships
-          WHERE publication_status = 'published'
-            AND verification_status = 'verified'
+          WHERE publication_status = 'published' AND verification_status = 'verified'
         `;
         const bindings = [];
-        if (country) { query += " AND destination_country = ?"; bindings.push(country); }
-        if (level) {
+        if (filters.country) { query += " AND destination_country LIKE ?"; bindings.push("%" + filters.country.slice(0, 100) + "%"); }
+        if (filters.level) {
           query += " AND EXISTS (SELECT 1 FROM json_each(scholarships.study_levels) WHERE value = ?)";
-          bindings.push(level);
+          bindings.push(filters.level);
         }
-        if (keyword) {
-          query += " AND (title LIKE ? OR provider LIKE ? OR eligibility_summary LIKE ?)";
-          const term = `%${keyword.slice(0, 80)}%`;
-          bindings.push(term, term, term);
+        if (filters.keyword) {
+          query += " AND (title LIKE ? OR provider LIKE ? OR eligibility_summary LIKE ? OR EXISTS (SELECT 1 FROM json_each(scholarships.subject_areas) WHERE value LIKE ?))";
+          const term = "%" + filters.keyword.slice(0, 80) + "%";
+          bindings.push(term, term, term, term);
         }
+        if (filters.subject) {
+          query += " AND EXISTS (SELECT 1 FROM json_each(scholarships.subject_areas) WHERE value LIKE ?)";
+          bindings.push("%" + filters.subject.slice(0, 80) + "%");
+        }
+        if (filters.funding) { query += " AND funding_type = ?"; bindings.push(filters.funding); }
+        if (filters.eligibility) {
+          query += " AND eligibility_summary LIKE ?";
+          bindings.push("%" + filters.eligibility.slice(0, 80) + "%");
+        }
+        if (filters.deadline === "upcoming") query += " AND (application_deadline IS NULL OR application_deadline >= date('now'))";
+        if (filters.deadline === "closing_30") query += " AND application_deadline BETWEEN date('now') AND date('now', '+30 days')";
+        if (filters.deadline === "expired") query += " AND application_deadline < date('now')";
+        if (filters.deadline === "not_listed") query += " AND application_deadline IS NULL";
         query += " ORDER BY application_deadline IS NULL, application_deadline ASC LIMIT ?";
         bindings.push(limit);
         const result = await env.DB.prepare(query).bind(...bindings).all();
-        return json({ scholarships: result.results || [], count: (result.results || []).length }, 200, cors);
+        return json({ scholarships: result.results || [], count: (result.results || []).length, limit }, 200, cors);
       }
-
       return json({ error: "Not found." }, 404, cors);
     } catch {
       return json({ error: "An unexpected server error occurred." }, 500, cors);
