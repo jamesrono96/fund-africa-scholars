@@ -133,6 +133,26 @@ export async function handleStudent(request, env, url) {
       country_of_residence: country, preferred_destinations: destinations } });
   }
 
+  if (url.pathname === "/api/student/recommendations" && request.method === "GET") {
+    let destinations = [];
+    try {
+      const parsed = JSON.parse(user.preferred_destinations || "[]");
+      if (Array.isArray(parsed)) destinations = parsed.filter(value => typeof value === "string");
+    } catch { /* Empty preferences produce no recommendations. */ }
+    if (!destinations.length) return json({ scholarships: [], message: "Add preferred study destinations to your profile to receive recommendations." });
+    const result = await env.DB.prepare(`
+      SELECT id, title, provider, destination_country, study_levels, subject_areas,
+             funding_type, funding_details, eligibility_summary, application_deadline,
+             official_url, source_checked_at
+      FROM scholarships
+      WHERE publication_status = 'published' AND verification_status = 'verified'
+        AND destination_country IN (SELECT value FROM json_each(?))
+      ORDER BY application_deadline IS NULL, application_deadline ASC
+      LIMIT 6
+    `).bind(JSON.stringify(destinations)).all();
+    return json({ scholarships: result.results || [], based_on: destinations });
+  }
+
   if (url.pathname === "/api/student/saved" && request.method === "GET") {
     return json({ scholarships: await listSaved(env.DB, user.id) });
   }
