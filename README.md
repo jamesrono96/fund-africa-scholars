@@ -20,15 +20,15 @@ A scholarship discovery and student-support platform focused on helping African 
 ## Repository structure
 
 - `index.html` — responsive landing-page preview
-- `directory.html` — public scholarship directory and search interface
+- `directory.html` — public scholarship directory and search interface\n- `scholarship.html` — individual verified scholarship details
 - `account.html` — student sign-in and registration interface
 - `admin.html` — administrator scholarship management interface
-- `assets/js/directory.js` — public scholarship search and rendering
+- `assets/js/directory.js` — public scholarship search and rendering\n- `assets/js/scholarship.js` — scholarship details and student save/track actions
 - `assets/js/account.js` — account page interactions and API client\n- `dashboard.html` — student saved-scholarships and application-tracking workspace\n- `assets/js/dashboard.js` — student dashboard interface and API client
 - `assets/js/admin.js` — admin dashboard interactions
 - `worker/admin.js` — admin-only scholarship management API handlers\n- `worker/student.js` — authenticated saved-scholarship and application-tracking API handlers
 - `db/schema.sql` — initial relational database schema
-- `worker/index.js` — API foundation with scholarship listing and student authentication endpoints
+- `worker/index.js` — API foundation with scholarship listing, detail and student authentication endpoints
 - `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
 - `db/migrations/0003_admin_setup_template.sql` — owner-only admin role setup template
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
