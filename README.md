@@ -24,9 +24,9 @@ A scholarship discovery and student-support platform focused on helping African 
 - `account.html` — student sign-in and registration interface
 - `admin.html` — administrator scholarship management interface
 - `assets/js/directory.js` — public scholarship search and rendering
-- `assets/js/account.js` — account page interactions and API client
+- `assets/js/account.js` — account page interactions and API client\n- `dashboard.html` — student saved-scholarships and application-tracking workspace\n- `assets/js/dashboard.js` — student dashboard interface and API client
 - `assets/js/admin.js` — admin dashboard interactions
-- `worker/admin.js` — admin-only scholarship management API handlers
+- `worker/admin.js` — admin-only scholarship management API handlers\n- `worker/student.js` — authenticated saved-scholarship and application-tracking API handlers
 - `db/schema.sql` — initial relational database schema
 - `worker/index.js` — API foundation with scholarship listing and student authentication endpoints
 - `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
