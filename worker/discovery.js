@@ -199,7 +199,7 @@ export async function handleDiscovery(request, env, url) {
   if (url.pathname === "/api/admin/discovery/candidates" && request.method === "GET") {
     const status = url.searchParams.get("status");
     if (status && !REVIEW.has(status)) return json({ error: "Invalid review status." }, 400);
-    const query = "SELECT c.id,c.title,c.provider,c.destination_country,c.official_url,c.summary,c.application_deadline,c.review_status,c.review_notes,c.scholarship_id,c.discovered_at,s.name AS source_name FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id " + (status ? "WHERE c.review_status=? " : "") + "ORDER BY c.discovered_at DESC LIMIT 200";
+    const query = "SELECT c.id,c.title,c.provider,c.destination_country,c.official_url,c.summary,c.application_deadline,c.review_status,c.review_notes,c.extracted_data_json,c.scholarship_id,c.discovered_at,s.name AS source_name FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id " + (status ? "WHERE c.review_status=? " : "") + "ORDER BY c.discovered_at DESC LIMIT 200";
     const result = status ? await env.DB.prepare(query).bind(status).all() : await env.DB.prepare(query).all();
     return json({ candidates: result.results || [] });
   }
