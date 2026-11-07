@@ -88,7 +88,7 @@ async function scanSource(source, db, adminId) {
     const keywords=/scholarship|fellowship|studentship|financial aid|funding opportunity|grant for students|bursary/i;
     let found=0,duplicates=0,skipped=0;
     for(const anchor of anchors.slice(0,3000)){
-      const hrefMatch=anchor.match(/\bhref\s*=\s*(["'])(.*?)\\1/i);
+      const hrefMatch=anchor.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
       if(!hrefMatch) continue;
       const title=decodeText(anchor.replace(/^<a\b[^>]*>/i,"").replace(/<\/a>$/i,""));
       if(!title || title.length<5 || title.length>180 || !keywords.test(title)) continue;
@@ -150,9 +150,16 @@ async function extractCandidate(candidateId, db, adminId) {
   if(!/text\/html|application\/xhtml\+xml/i.test(contentType))return {error:"Official page did not return HTML.",status:415};
   const html=await limitedText(response,900000);
   const extracted=extractScholarshipFields(html,candidate);
-  await db.prepare("UPDATE scholarship_candidates SET summary=CASE WHEN ?<>'' THEN ? ELSE summary END,extracted_data_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(extracted.description,extracted.description,JSON.stringify(extracted),candidateId).run();
-  await audit(db,adminId,"discovery.candidate_extracted","scholarship_candidate",candidateId,{method:extracted.extraction_method,eligibility_snippets:extracted.eligibility_snippets.length,deadline_text:extracted.deadline_text.length});
-  return {candidate_id:candidateId,extracted,message:"Extraction suggestions saved for human review. No scholarship facts were verified or published."};
+  const contentHash=await sha256(html);
+  const previous=await db.prepare("SELECT id,content_hash,fetched_at FROM candidate_source_snapshots WHERE candidate_id=? ORDER BY fetched_at DESC LIMIT 1").bind(candidateId).first();
+  const changed=Boolean(previous && previous.content_hash!==contentHash);
+  const snapshotId=crypto.randomUUID();
+  await db.prepare("INSERT INTO candidate_source_snapshots (id,candidate_id,source_id,official_url,content_hash,page_title,description,body_excerpt,change_detected,previous_snapshot_id) VALUES (?,?,?,?,?,?,?,?,?,?)")
+    .bind(snapshotId,candidateId,candidate.source_id,candidate.official_url,contentHash,extracted.page_title,extracted.description,htmlText(html).slice(0,4000),changed?1:0,previous?.id||null).run();
+  await db.prepare("UPDATE scholarship_candidates SET summary=CASE WHEN ?<>'' THEN ? ELSE summary END,extracted_data_json=?,review_status=CASE WHEN ?=1 AND review_status NOT IN ('rejected','duplicate') THEN 'needs_review' ELSE review_status END,updated_at=CURRENT_TIMESTAMP WHERE id=?")
+    .bind(extracted.description,extracted.description,changed?1:0,JSON.stringify(extracted),candidateId).run();
+  await audit(db,adminId,changed?"discovery.candidate_source_changed":"discovery.candidate_extracted","scholarship_candidate",candidateId,{method:extracted.extraction_method,source_changed:changed,previous_snapshot_id:previous?.id||null,snapshot_id:snapshotId});
+  return {candidate_id:candidateId,extracted,source_changed:changed,previous_checked_at:previous?.fetched_at||null,message:changed?"The official page differs from the previous check. Candidate moved to Needs review; compare the changes manually.":"Extraction suggestions saved for human review. No scholarship facts were verified or published."};
 }
 
 export async function handleDiscovery(request, env, url) {
@@ -196,10 +203,16 @@ export async function handleDiscovery(request, env, url) {
     return json({ id, message: "Official source registered. No scan has been run." }, 201);
   }
 
+  const historyMatch=url.pathname.match(/^\\/api\\/admin\\/discovery\\/candidates\\/([a-f0-9-]{36})\\/history$/i);
+  if(historyMatch && request.method==="GET"){
+    const rows=await env.DB.prepare("SELECT id,content_hash,page_title,description,fetched_at,change_detected,previous_snapshot_id FROM candidate_source_snapshots WHERE candidate_id=? ORDER BY fetched_at DESC LIMIT 30").bind(historyMatch[1]).all();
+    return json({snapshots:rows.results||[]});
+  }
+
   if (url.pathname === "/api/admin/discovery/candidates" && request.method === "GET") {
     const status = url.searchParams.get("status");
     if (status && !REVIEW.has(status)) return json({ error: "Invalid review status." }, 400);
-    const query = "SELECT c.id,c.title,c.provider,c.destination_country,c.official_url,c.summary,c.application_deadline,c.review_status,c.review_notes,c.extracted_data_json,c.scholarship_id,c.discovered_at,s.name AS source_name FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id " + (status ? "WHERE c.review_status=? " : "") + "ORDER BY c.discovered_at DESC LIMIT 200";
+    const query = "SELECT c.id,c.title,c.provider,c.destination_country,c.official_url,c.summary,c.application_deadline,c.review_status,c.review_notes,c.extracted_data_json,c.scholarship_id,c.discovered_at,s.name AS source_name,(SELECT fetched_at FROM candidate_source_snapshots ss WHERE ss.candidate_id=c.id ORDER BY fetched_at DESC LIMIT 1) AS last_source_check_at,(SELECT change_detected FROM candidate_source_snapshots ss WHERE ss.candidate_id=c.id ORDER BY fetched_at DESC LIMIT 1) AS latest_source_changed FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id " + (status ? "WHERE c.review_status=? " : "") + "ORDER BY c.discovered_at DESC LIMIT 200";
     const result = status ? await env.DB.prepare(query).bind(status).all() : await env.DB.prepare(query).all();
     return json({ candidates: result.results || [] });
   }
