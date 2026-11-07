@@ -17,7 +17,8 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [ ] Filters for funding type, eligibility and deadline
 - [ ] Pagination and empty/loading/error states
 - [ ] Official source link, source checked date and verification status
-- [ ] Admin review before a scholarship becomes public
+- [x] Admin review and publication status fields/API foundations
+- [x] Scholarship source URL and source checked date fields
 
 **Acceptance:** a visitor can find a published scholarship, understand its eligibility and deadline, and open the official provider source.
 
@@ -51,8 +52,11 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 ## Phase 5 — Administration
 
-- [ ] Admin-only dashboard
-- [ ] Create, edit, archive and review scholarship records
+- [x] Admin-only dashboard interface
+- [x] Admin-only create, edit, archive and review API foundations
+- [x] Verification required before publication
+- [x] Admin action audit-log foundation
+- [ ] Configure database and securely promote the owner's admin account
 - [ ] User and membership management
 - [ ] Audit log for sensitive actions
 - [ ] Role-based access control
