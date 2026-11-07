@@ -74,6 +74,8 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Candidate review queue API foundation with duplicate URL/fingerprint checks
 - [x] Admin-only candidate review statuses and audit events
 - [ ] Curated list of official provider sources
+- [x] Admin-triggered official-source link scan foundation (same-domain links only; no AI extraction)
+- [x] Discovery run history and scan result audit trail
 - [ ] Scheduled discovery jobs
 - [ ] Duplicate detection
 - [ ] Extract eligibility, funding and deadline fields
