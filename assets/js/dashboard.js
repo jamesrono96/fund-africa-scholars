@@ -6,6 +6,7 @@
   let activeTab = "saved";
   let saved = [];
   let applications = [];
+  const destinations = ["United States","United Kingdom","China","Australia","Canada","Germany","Japan","South Korea","France","Netherlands","Sweden","Switzerland","New Zealand","Ireland","Finland","Norway","Denmark","Italy","Spain","Singapore","South Africa","Kenya"];
   const status = $("status");
   function message(text, error = false) {
     status.textContent = text;
@@ -142,15 +143,61 @@
     applications = data.applications || [];
     renderApplications();
   }
+  async function loadProfile() {
+    const data = await api("/api/student/profile");
+    const profile = data.profile;
+    $("profile-name").value = profile.full_name || "";
+    $("profile-email").value = profile.email || "";
+    $("profile-country").value = profile.country_of_residence || "";
+    const root = $("destination-options");
+    root.replaceChildren();
+    const selected = new Set(profile.preferred_destinations || []);
+    for (const country of destinations) {
+      const label = node("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = country;
+      checkbox.checked = selected.has(country);
+      checkbox.addEventListener("change", () => {
+        const checked = root.querySelectorAll('input[type="checkbox"]:checked');
+        if (checked.length > 10) {
+          checkbox.checked = false;
+          message("You can select a maximum of 10 destinations.", true);
+        }
+      });
+      label.append(checkbox, document.createTextNode(country));
+      root.append(label);
+    }
+  }
+  $("profile-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = $("save-profile");
+    button.disabled = true;
+    const preferred_destinations = [...$("destination-options").querySelectorAll('input:checked')].map(input => input.value);
+    try {
+      const data = await api("/api/student/profile", { method: "PATCH", body: {
+        full_name: $("profile-name").value,
+        country_of_residence: $("profile-country").value,
+        preferred_destinations
+      }});
+      $("welcome").textContent = "Welcome, " + data.profile.full_name.split(" ")[0];
+      $("profile-line").textContent = data.profile.email + (data.profile.country_of_residence ? " · " + data.profile.country_of_residence : "");
+      message("Your profile and study preferences have been saved.");
+    } catch (error) { message(error.message, true); }
+    finally { button.disabled = false; }
+  });
   function showTab(tab) {
     activeTab = tab;
     $("saved-tab").setAttribute("aria-selected", String(tab === "saved"));
     $("apps-tab").setAttribute("aria-selected", String(tab === "apps"));
+    $("profile-tab").setAttribute("aria-selected", String(tab === "profile"));
     $("saved-list").classList.toggle("hidden", tab !== "saved");
     $("apps-list").classList.toggle("hidden", tab !== "apps");
+    $("profile-panel").classList.toggle("hidden", tab !== "profile");
   }
   $("saved-tab").addEventListener("click", () => showTab("saved"));
   $("apps-tab").addEventListener("click", () => showTab("apps"));
+  $("profile-tab").addEventListener("click", () => showTab("profile"));
   async function init() {
     if (!API_BASE) {
       $("profile-line").textContent = "Student account features are not connected yet.";
@@ -161,7 +208,7 @@
       const me = await api("/api/auth/me");
       $("welcome").textContent = "Welcome, " + me.user.full_name.split(" ")[0];
       $("profile-line").textContent = me.user.email + (me.user.country_of_residence ? " · " + me.user.country_of_residence : "");
-      await Promise.all([loadSaved(), loadApplications()]);
+      await Promise.all([loadSaved(), loadApplications(), loadProfile()]);
       showTab(activeTab);
       message("Your private student workspace is ready.");
     } catch (error) {
