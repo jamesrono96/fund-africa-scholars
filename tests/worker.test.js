@@ -210,3 +210,63 @@ test("students cannot update another user's application", async () => {
   assert.match((await response.json()).error, /Application not found/);
   assert.ok(db.statements.some(item => item.sql.includes("WHERE id = ? AND user_id = ?")));
 });
+
+
+test("students can read their own profile without exposing editable email", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/profile", "GET"), {
+    DB: db, APP_ORIGIN: "https://app.example.test"
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.profile.email, "student@example.test");
+  assert.equal(data.profile.full_name, "Test Student");
+  assert.deepEqual(data.profile.preferred_destinations, []);
+  assert.ok(db.statements.some(item => item.sql.includes("preferred_destinations")));
+});
+
+test("students can update name, residence and validated study destinations", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/profile", "PATCH", {
+    full_name: " Updated Student ",
+    country_of_residence: "Kenya",
+    preferred_destinations: ["United Kingdom", "Canada"]
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.profile.full_name, "Updated Student");
+  assert.deepEqual(data.profile.preferred_destinations, ["United Kingdom", "Canada"]);
+  const update = db.statements.find(item => item.sql.includes("UPDATE users"));
+  assert.ok(update);
+  assert.deepEqual(update.values, ["Updated Student", "Kenya", '["United Kingdom","Canada"]', "student-1"]);
+});
+
+test("student profile rejects invalid or duplicate destinations", async () => {
+  for (const destinations of [["Mars"], ["Canada", "Canada"], Array(11).fill("Canada")]) {
+    const response = await worker.fetch(studentRequest("/api/student/profile", "PATCH", {
+      preferred_destinations: destinations
+    }), { DB: new StudentMockD1(), APP_ORIGIN: "https://app.example.test" });
+    assert.equal(response.status, 400);
+  }
+});
+
+test("student profile cannot be used to change email or other protected fields", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/profile", "PATCH", {
+    email: "attacker@example.test"
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 400);
+  assert.equal(db.statements.some(item => item.sql.includes("UPDATE users")), false);
+});
+
+test("student profile updates require the configured application origin", async () => {
+  const db = new StudentMockD1();
+  const req = request("/api/student/profile", {
+    method: "PATCH",
+    headers: { cookie: "fas_session=valid-test-session", origin: "https://attacker.example.test", "content-type": "application/json" },
+    body: JSON.stringify({ full_name: "Changed Name" })
+  });
+  const response = await worker.fetch(req, { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 403);
+  assert.equal(db.statements.some(item => item.sql.includes("UPDATE users")), false);
+});
