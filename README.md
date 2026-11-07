@@ -35,7 +35,9 @@ A scholarship discovery and student-support platform focused on helping African 
 - `db/schema.sql` — initial relational database schema
 - `worker/index.js` — API foundation with scholarship listing, detail and student authentication endpoints
 - `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
-- `db/migrations/0003_admin_setup_template.sql` — owner-only admin role setup template\n- `db/migrations/0004_scholarship_discovery.sql` — discovery sources, runs and candidate queue\n- `db/migrations/0005_candidate_source_snapshots.sql` — official-page snapshot and change history
+- `db/migrations/0003_admin_setup_template.sql` — owner-only admin role setup template
+- `db/migrations/0004_scholarship_discovery.sql` — discovery sources, runs and candidate queue
+- `db/migrations/0005_candidate_source_snapshots.sql` — official-page snapshot and change history
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
 - `wrangler.toml` — local/deployment configuration template (not deployed)
 - `docs/ROADMAP.md` — build sequence and completion criteria
@@ -63,8 +65,15 @@ The admin API includes a manual official-source registry and a candidate review 
 ### Manual source checks
 
 An administrator can trigger a check for a registered source. The Worker fetches the registered HTTPS page without following redirects, limits the HTML response size, and only queues matching scholarship-related links on that same official domain. These are link-title candidates, not verified scholarship facts. Every candidate stays private for human review; no scan publishes records. Scheduled scans and AI extraction are not implemented.
-\n\nAccepted discovery candidates can be converted by an administrator into unpublished scholarship drafts. Drafts start with pending verification and a prominent eligibility placeholder; conversion does not verify or publish them.\n
 
-### Candidate source change tracking\n\nEach manual candidate-page extraction stores a SHA-256 content fingerprint, page title, description and a bounded text excerpt. A later extraction compares the page with its previous snapshot. If the content differs, the candidate is moved to `needs_review` (unless already rejected or marked duplicate), an audit event is recorded, and administrators can inspect the snapshot history. A detected change is only a review signal; it does not establish what changed or whether scholarship details are different.\n\n### Candidate detail extraction
+
+Accepted discovery candidates can be converted by an administrator into unpublished scholarship drafts. Drafts start with pending verification and a prominent eligibility placeholder; conversion does not verify or publish them.
+
+
+### Candidate source change tracking
+
+Each manual candidate-page extraction stores a SHA-256 content fingerprint, page title, description and a bounded text excerpt. A later extraction compares the page with its previous snapshot. If the content differs, the candidate is moved to `needs_review` (unless already rejected or marked duplicate), an audit event is recorded, and administrators can inspect the snapshot history. A detected change is only a review signal; it does not establish what changed or whether scholarship details are different.
+
+### Candidate detail extraction
 
 Administrators can request a bounded HTML inspection of a candidate page on its registered official domain. The current rule-based helper captures page title/description and possible funding, study-level, eligibility and deadline clues into the private candidate record. It does not infer a confirmed deadline from ambiguous text, does not call an AI model, and does not publish anything. Administrators must compare every suggestion with the official page before editing or verifying a scholarship.
