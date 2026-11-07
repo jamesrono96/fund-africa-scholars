@@ -24,14 +24,14 @@ A scholarship discovery and student-support platform focused on helping African 
 - `scholarship.html` — individual verified scholarship details
 - `account.html` — student sign-in and registration interface
 - `admin.html` — administrator scholarship management interface
-- `assets/js/directory.js` — public scholarship search and rendering
+- `assets/js/directory.js` — public scholarship search, rendering and signed-in destination recommendations
 - `assets/js/scholarship.js` — scholarship details and student save/track actions
 - `assets/js/account.js` — account page interactions and API client
 - `dashboard.html` — student profile, saved-scholarships and application-tracking workspace
 - `assets/js/dashboard.js` — student profile/preferences, dashboard interface and API client
 - `assets/js/admin.js` — admin dashboard interactions
 - `worker/admin.js` — admin-only scholarship management API handlers
-- `worker/student.js` — authenticated profile, saved-scholarship and application-tracking API handlers
+- `worker/student.js` — authenticated profile, destination recommendations, saved-scholarship and application-tracking API handlers
 - `db/schema.sql` — initial relational database schema
 - `worker/index.js` — API foundation with scholarship listing, detail and student authentication endpoints
 - `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
@@ -107,3 +107,8 @@ GitHub Actions now runs JavaScript syntax checks for Worker and browser scripts,
 ### Student profile foundation
 
 The student dashboard includes a profile section for editing a student's display name and country of residence, plus up to ten preferred study destinations. The email address is read-only. The authenticated API validates profile fields, restricts destination choices to supported countries, checks the application origin for updates, and returns only the signed-in student's profile. This is implemented code only; it is not live until the Worker and D1 database are configured and tested in a development environment.
+
+
+### Destination-based recommendations
+
+Signed-in students can see a small set of published, verified scholarships whose destination country matches one of their saved study preferences. The recommendation endpoint is private, uses only the student's own preferences, and never includes draft or unverified records. The directory labels these as destination matches only; it does not claim that the student meets each scholarship's eligibility criteria. Recommendations require a configured API and database and are not live in this GitHub-only development stage.
