@@ -7,12 +7,13 @@ class MockD1 {
   prepare(sql) {
     const statement = { sql, values: [] };
     this.statements.push(statement);
-    return {
-      bind: (...values) => { statement.values = values; return this; },
+    const prepared = {
+      bind: (...values) => { statement.values = values; return prepared; },
       first: async () => null,
       all: async () => ({ results: [] }),
       run: async () => ({ meta: { changes: 0 } })
     };
+    return prepared;
   }
 }
 
