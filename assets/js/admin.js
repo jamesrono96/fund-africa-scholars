@@ -71,6 +71,46 @@ async function renderFieldReviews(candidate,container){
  list.append(historyButton);wrap.append(list);container.append(wrap);
 }
 
+
+const verificationItems=[
+ ["official_source","Official source and provider identity"],
+ ["current_intake","Current application intake is open/current"],
+ ["eligible_nationalities","Eligible nationalities, including African applicants"],
+ ["study_level","Eligible study level and programme"],
+ ["funding_terms","Funding coverage, amounts and conditions"],
+ ["application_deadline","Application deadline and time zone"],
+ ["application_route","Official application route and requirements"]
+];
+async function checklistPanel(item,host){
+ const details=document.createElement("details");details.style.marginTop="8px";
+ const summary=document.createElement("summary");summary.textContent="Verification checklist";details.append(summary);
+ const form=document.createElement("div");form.style.minWidth="280px";form.style.padding="8px 0";
+ let existing={};try{const data=await api("/api/admin/scholarships/"+item.id+"/verification-checklist");for(const c of data.checks||[])existing[c.check_key]=c;}catch(error){msg("list-message",error.message,"error");}
+ const controls=[];
+ for(const [key,label] of verificationItems){
+  const section=document.createElement("div");section.style.borderTop="1px solid #ddd";section.style.padding="8px 0";
+  const title=document.createElement("strong");title.textContent=label;section.append(title);
+  const select=document.createElement("select");for(const [v,t] of [["needs_follow_up","Needs follow-up"],["confirmed","Confirmed"],["not_applicable","Not applicable"]]){const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o);}
+  const url=document.createElement("input");url.type="url";url.placeholder="Official evidence URL";url.style.width="100%";url.style.marginTop="5px";
+  const excerpt=document.createElement("textarea");excerpt.placeholder="Quote or concise evidence excerpt from the official page";excerpt.maxLength=1200;excerpt.style.width="100%";excerpt.style.marginTop="5px";excerpt.rows=2;
+  const notes=document.createElement("input");notes.placeholder="Reviewer notes (optional)";notes.maxLength=1200;notes.style.width="100%";notes.style.marginTop="5px";
+  if(existing[key]){select.value=existing[key].decision;url.value=existing[key].evidence_url;excerpt.value=existing[key].evidence_excerpt;notes.value=existing[key].reviewer_notes||"";}
+  section.append(select,url,excerpt,notes);form.append(section);controls.push({key,select,url,excerpt,notes});
+ }
+ const save=document.createElement("button");save.className="btn secondary";save.type="button";save.textContent="Save all checklist items";
+ save.addEventListener("click",async()=>{
+  save.disabled=true;
+  try{
+   for(const c of controls){
+    if(!c.url.value.trim()||!c.excerpt.value.trim())throw new Error("Add an official evidence URL and excerpt for all seven checklist items.");
+    await api("/api/admin/scholarships/"+item.id+"/verification-checklist",{method:"POST",body:{check_key:c.key,decision:c.select.value,evidence_url:c.url.value.trim(),evidence_excerpt:c.excerpt.value.trim(),reviewer_notes:c.notes.value.trim()}});
+   }
+   msg("list-message","All seven checklist decisions saved. You can now mark the scholarship verified only if every item is confirmed or not applicable.","success");
+  }catch(error){msg("list-message",error.message,"error");}
+  finally{save.disabled=false;}
+ });
+ form.append(save);details.append(form);host.append(details);
+}
 function render(){
  const body=$("records");body.replaceChildren();
  if(!records.length){const tr=document.createElement("tr"),td=cell("No scholarship records yet.");td.colSpan=6;tr.append(td);body.append(tr);return;}
@@ -80,7 +120,7 @@ function render(){
   const actions=cell("");
   const edit=document.createElement("button");edit.className="btn secondary";edit.type="button";edit.textContent="Edit";edit.addEventListener("click",()=>fillForm(item));
   const archive=document.createElement("button");archive.className="btn danger";archive.type="button";archive.textContent="Archive";archive.style.marginLeft="6px";archive.addEventListener("click",()=>archiveRecord(item.id));
-  actions.append(edit,archive);tr.append(actions);body.append(tr);
+  actions.append(edit,archive);checklistPanel(item,actions);tr.append(actions);body.append(tr);
  }
 }
 async function loadRecords(){
