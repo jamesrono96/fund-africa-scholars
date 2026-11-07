@@ -4,7 +4,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Development status
 
-**Private development stage — not deployed.** The project is being built and reviewed in GitHub first. No production website, payment processing, or live student accounts are active.
+**GitHub Pages preview configured; Cloudflare production is not deployed.** The static preview is intended for visual review only. The Cloudflare Worker API, D1 database, payment processing and live student accounts are not active. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
 
 ## Planned features
 
