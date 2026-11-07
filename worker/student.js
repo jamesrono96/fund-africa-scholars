@@ -6,6 +6,7 @@ const HEADERS = {
 };
 const COOKIE = "fas_session";
 const STATUSES = new Set(["interested", "preparing", "submitted", "accepted", "rejected", "withdrawn"]);
+const DESTINATIONS = new Set(["United States","United Kingdom","China","Australia","Canada","Germany","Japan","South Korea","France","Netherlands","Sweden","Switzerland","New Zealand","Ireland","Finland","Norway","Denmark","Italy","Spain","Singapore","South Africa","Kenya"]);
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: HEADERS });
@@ -27,7 +28,7 @@ async function signedInUser(request, db) {
   if (!token || token.length > 128) return null;
   const tokenHash = await sha256(token);
   return await db.prepare(`
-    SELECT users.id, users.email, users.full_name, users.country_of_residence
+    SELECT users.id, users.email, users.full_name, users.country_of_residence, users.preferred_destinations
     FROM sessions JOIN users ON users.id = sessions.user_id
     WHERE sessions.token_hash = ? AND sessions.expires_at > ?
     LIMIT 1
@@ -82,6 +83,54 @@ export async function handleStudent(request, env, url) {
 
   if (request.method !== "GET" && !allowedOrigin(request, env)) {
     return json({ error: "Request origin is not allowed." }, 403);
+  }
+
+  if (url.pathname === "/api/student/profile" && request.method === "GET") {
+    let destinations = [];
+    try {
+      const parsed = JSON.parse(user.preferred_destinations || "[]");
+      if (Array.isArray(parsed)) destinations = parsed.filter(value => typeof value === "string");
+    } catch { /* Treat malformed legacy preference data as empty. */ }
+    return json({ profile: { full_name: user.full_name, email: user.email,
+      country_of_residence: user.country_of_residence || "", preferred_destinations: destinations } });
+  }
+  if (url.pathname === "/api/student/profile" && request.method === "PATCH") {
+    const parsed = await readBody(request);
+    if (parsed.error) return json({ error: parsed.error }, 400);
+    const body = parsed.body;
+    const allowed = new Set(["full_name", "country_of_residence", "preferred_destinations"]);
+    if (Object.keys(body).some(key => !allowed.has(key)) || Object.keys(body).length === 0)
+      return json({ error: "Only name, country of residence and preferred destinations can be updated." }, 400);
+    let fullName = user.full_name;
+    let country = user.country_of_residence || "";
+    let destinations = [];
+    try {
+      const current = JSON.parse(user.preferred_destinations || "[]");
+      if (Array.isArray(current)) destinations = current.filter(value => typeof value === "string");
+    } catch { /* Reset malformed legacy preference data on profile save. */ }
+    if (body.full_name !== undefined) {
+      if (typeof body.full_name !== "string" || body.full_name.trim().length < 2 || body.full_name.trim().length > 100)
+        return json({ error: "Full name must be between 2 and 100 characters." }, 400);
+      fullName = body.full_name.trim();
+    }
+    if (body.country_of_residence !== undefined) {
+      if (typeof body.country_of_residence !== "string" || body.country_of_residence.trim().length > 80)
+        return json({ error: "Country of residence must be 80 characters or fewer." }, 400);
+      country = body.country_of_residence.trim();
+    }
+    if (body.preferred_destinations !== undefined) {
+      if (!Array.isArray(body.preferred_destinations) || body.preferred_destinations.length > 10 ||
+          body.preferred_destinations.some(value => typeof value !== "string" || !DESTINATIONS.has(value)) ||
+          new Set(body.preferred_destinations).size !== body.preferred_destinations.length)
+        return json({ error: "Choose up to 10 valid, unique study destinations." }, 400);
+      destinations = body.preferred_destinations;
+    }
+    await env.DB.prepare(`
+      UPDATE users SET full_name = ?, country_of_residence = ?, preferred_destinations = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(fullName, country, JSON.stringify(destinations), user.id).run();
+    return json({ ok: true, profile: { full_name: fullName, email: user.email,
+      country_of_residence: country, preferred_destinations: destinations } });
   }
 
   if (url.pathname === "/api/student/saved" && request.method === "GET") {
