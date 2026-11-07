@@ -82,3 +82,8 @@ Administrators can request a bounded HTML inspection of a candidate page on its 
 ### Evidence-backed extraction suggestions
 
 Manual extraction now stores structured funding, study-level, eligibility and deadline clues with short evidence excerpts from the fetched official page. Each clue has a conservative review-confidence label and an explanation of why it received that label. Date-shaped strings are deliberately not treated as confirmed deadlines, and the helper does not assign automatic high confidence. This is deterministic rule-based extraction, not an AI model; every suggestion requires human verification. An AI provider/model integration remains a separate future task and must preserve source evidence and human approval.
+
+
+### Optional AI-assisted candidate review
+
+The admin API includes an optional Workers AI review route at `POST /api/admin/discovery/candidates/:id/ai-extract`. It is inactive unless a Workers AI binding named `AI` is configured in a development environment. The model can be selected with the non-secret `AI_MODEL` environment variable; the code has a default model identifier that must be confirmed against the account's enabled Workers AI models. The route fetches only the candidate's registered official HTTPS page, treats page text as untrusted input, asks for JSON suggestions with exact quotations, and discards suggestions whose evidence is not found verbatim in the fetched text. Rule-based extraction results are preserved alongside AI results. This is an optional integration foundation, not a live AI feature: no binding is enabled here, no credentials are stored in GitHub, and the route has not been tested against a configured AI account. AI output remains unverified and cannot publish scholarships.
