@@ -90,7 +90,7 @@ async function checklistPanel(item,host){
  for(const [key,label] of verificationItems){
   const section=document.createElement("div");section.style.borderTop="1px solid #ddd";section.style.padding="8px 0";
   const title=document.createElement("strong");title.textContent=label;section.append(title);
-  const select=document.createElement("select");for(const [v,t] of [["needs_follow_up","Needs follow-up"],["confirmed","Confirmed"],["not_applicable","Not applicable"]]){const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o);}
+  const select=document.createElement("select");for(const [v,t] of [["needs_follow_up","Needs follow-up"],["confirmed","Confirmed"],...(key==="application_deadline"?[["not_applicable","Not applicable — no deadline published"]]:[])]){const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o);}
   const url=document.createElement("input");url.type="url";url.placeholder="Official evidence URL";url.style.width="100%";url.style.marginTop="5px";
   const excerpt=document.createElement("textarea");excerpt.placeholder="Quote or concise evidence excerpt from the official page";excerpt.maxLength=1200;excerpt.style.width="100%";excerpt.style.marginTop="5px";excerpt.rows=2;
   const notes=document.createElement("input");notes.placeholder="Reviewer notes (optional)";notes.maxLength=1200;notes.style.width="100%";notes.style.marginTop="5px";
