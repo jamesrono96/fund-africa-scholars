@@ -203,7 +203,7 @@ export async function handleDiscovery(request, env, url) {
     return json({ id, message: "Official source registered. No scan has been run." }, 201);
   }
 
-  const historyMatch=url.pathname.match(/^\\/api\\/admin\\/discovery\\/candidates\\/([a-f0-9-]{36})\\/history$/i);
+  const historyMatch=url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/history$/i);
   if(historyMatch && request.method==="GET"){
     const rows=await env.DB.prepare("SELECT id,content_hash,page_title,description,fetched_at,change_detected,previous_snapshot_id FROM candidate_source_snapshots WHERE candidate_id=? ORDER BY fetched_at DESC LIMIT 30").bind(historyMatch[1]).all();
     return json({snapshots:rows.results||[]});
