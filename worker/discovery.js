@@ -57,7 +57,7 @@ async function audit(db, adminId, action, type, id, details = {}) {
 }
 
 function decodeText(value) {
-  return value.replace(/<[^>]*>/g," ").replace(/&amp;/gi,"&").replace(/&nbsp;/gi," ").replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/\\s+/g," ").trim();
+  return value.replace(/<[^>]*>/g," ").replace(/&amp;/gi,"&").replace(/&nbsp;/gi," ").replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/\s+/g," ").trim();
 }
 async function limitedText(response, maxBytes = 900000) {
   if (!response.body) return "";
@@ -84,19 +84,19 @@ async function scanSource(source, db, adminId) {
     const type=response.headers.get("content-type")||"";
     if(!type.toLowerCase().includes("text/html") && !type.toLowerCase().includes("application/xhtml+xml")) throw new Error("Source did not return an HTML page.");
     const html=await limitedText(response);
-    const anchors=html.match(/<a\\b[^>]*>[\\s\\S]*?<\\/a>/gi)||[];
+    const anchors=html.match(/<a\b[^>]*>[\s\S]*?<\/a>/gi)||[];
     const keywords=/scholarship|fellowship|studentship|financial aid|funding opportunity|grant for students|bursary/i;
     let found=0,duplicates=0,skipped=0;
     for(const anchor of anchors.slice(0,3000)){
-      const hrefMatch=anchor.match(/\\bhref\\s*=\\s*(["'])(.*?)\\1/i);
+      const hrefMatch=anchor.match(/\bhref\s*=\s*(["'])(.*?)\\1/i);
       if(!hrefMatch) continue;
-      const title=decodeText(anchor.replace(/^<a\\b[^>]*>/i,"").replace(/<\\/a>$/i,""));
+      const title=decodeText(anchor.replace(/^<a\b[^>]*>/i,"").replace(/<\/a>$/i,""));
       if(!title || title.length<5 || title.length>180 || !keywords.test(title)) continue;
       let candidateUrl;
       try{candidateUrl=new URL(hrefMatch[2],pageUrl);}catch{skipped++;continue;}
       if(candidateUrl.protocol!=="https:" || candidateUrl.hostname.toLowerCase().replace(/^www\\./,"")!==source.official_domain.toLowerCase().replace(/^www\\./,"") || candidateUrl.username || candidateUrl.password){skipped++;continue;}
       candidateUrl.hash="";
-      const normalized=candidateUrl.origin.toLowerCase()+candidateUrl.pathname.replace(/\\/$/,"").toLowerCase();
+      const normalized=candidateUrl.origin.toLowerCase()+candidateUrl.pathname.replace(/\/$/,"").toLowerCase();
       const id=crypto.randomUUID(), fingerprint=await sha256([title.toLowerCase(),source.name.toLowerCase()].join("|"));
       try{
         await db.prepare("INSERT INTO scholarship_candidates (id,source_id,discovery_run_id,title,provider,destination_country,official_url,normalized_url,content_fingerprint,summary,extracted_data_json,review_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,'pending')")
@@ -162,7 +162,7 @@ export async function handleDiscovery(request, env, url) {
   if (!admin) return json({ error: "Administrator access required." }, 403);
 
 
-  const scanMatch=url.pathname.match(/^\\/api\\/admin\\/discovery\\/sources\\/([a-f0-9-]{36})\\/check$/i);
+  const scanMatch=url.pathname.match(/^\/api\/admin\/discovery\/sources\/([a-f0-9-]{36})\/check$/i);
   if(scanMatch && request.method==="POST"){
     const source=await env.DB.prepare("SELECT id,name,official_domain,source_url,country,is_active FROM scholarship_sources WHERE id=?").bind(scanMatch[1]).first();
     if(!source || !source.is_active) return json({error:"Active registered source not found."},404);
