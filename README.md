@@ -21,10 +21,15 @@ A scholarship discovery and student-support platform focused on helping African 
 
 - `index.html` — responsive landing-page preview
 - `account.html` — student sign-in and registration interface
+- `admin.html` — administrator scholarship management interface
 - `assets/js/account.js` — account page interactions and API client
+- `assets/js/admin.js` — admin dashboard interactions
+- `worker/admin.js` — admin-only scholarship management API handlers
 - `db/schema.sql` — initial relational database schema
 - `worker/index.js` — API foundation with scholarship listing and student authentication endpoints
 - `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
+- `db/migrations/0003_admin_setup_template.sql` — owner-only admin role setup template
+- `docs/ADMIN_SETUP.md` — secure admin setup instructions
 - `wrangler.toml` — local/deployment configuration template (not deployed)
 - `docs/ROADMAP.md` — build sequence and completion criteria
 
