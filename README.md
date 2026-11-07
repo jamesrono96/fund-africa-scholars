@@ -20,8 +20,10 @@ A scholarship discovery and student-support platform focused on helping African 
 ## Repository structure
 
 - `index.html` — responsive landing-page preview
+- `directory.html` — public scholarship directory and search interface
 - `account.html` — student sign-in and registration interface
 - `admin.html` — administrator scholarship management interface
+- `assets/js/directory.js` — public scholarship search and rendering
 - `assets/js/account.js` — account page interactions and API client
 - `assets/js/admin.js` — admin dashboard interactions
 - `worker/admin.js` — admin-only scholarship management API handlers
