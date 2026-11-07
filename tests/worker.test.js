@@ -78,3 +78,63 @@ test("unsupported public study-level filters are rejected", async () => {
   assert.equal(response.status, 400);
   assert.equal(db.statements.length, 0);
 });
+
+test("publishing requires a previously saved verified state", async () => {
+  class AdminMockD1 extends MockD1 {
+    prepare(sql) {
+      const base = super.prepare(sql);
+      return {
+        ...base,
+        first: async () => {
+          if (sql.includes("FROM sessions JOIN users")) return { id: "admin-1", role: "admin" };
+          if (sql.includes("SELECT id,verification_status,publication_status")) {
+            return { id: "123e4567-e89b-12d3-a456-426614174000", verification_status: "pending", publication_status: "draft" };
+          }
+          return null;
+        }
+      };
+    }
+  }
+  const token = "test-session-token";
+  const response = await worker.fetch(request("/api/admin/scholarships/123e4567-e89b-12d3-a456-426614174000", {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://app.example.test",
+      cookie: "fas_session=" + token
+    },
+    body: JSON.stringify({ publication_status: "published" })
+  }), { DB: new AdminMockD1(), APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /separate step/);
+});
+
+test("changing an official source requires resetting verification and publication", async () => {
+  class AdminMockD1 extends MockD1 {
+    prepare(sql) {
+      const base = super.prepare(sql);
+      return {
+        ...base,
+        first: async () => {
+          if (sql.includes("FROM sessions JOIN users")) return { id: "admin-1", role: "admin" };
+          if (sql.includes("SELECT id,verification_status,publication_status")) {
+            return { id: "123e4567-e89b-12d3-a456-426614174000", verification_status: "verified", publication_status: "published" };
+          }
+          if (sql.includes("SELECT official_url FROM scholarships")) return { official_url: "https://old.example.org/scholarships" };
+          return null;
+        }
+      };
+    }
+  }
+  const response = await worker.fetch(request("/api/admin/scholarships/123e4567-e89b-12d3-a456-426614174000", {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://app.example.test",
+      cookie: "fas_session=test-session-token"
+    },
+    body: JSON.stringify({ official_url: "https://new.example.org/scholarships" })
+  }), { DB: new AdminMockD1(), APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 409);
+  assert.match((await response.json()).error, /resetting verification_status/);
+});
