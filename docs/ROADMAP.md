@@ -70,6 +70,9 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 ## Phase 6 — Scholarship discovery and monitoring
 
+- [x] Official source registry API foundation (manual source registration; no automated crawling yet)
+- [x] Candidate review queue API foundation with duplicate URL/fingerprint checks
+- [x] Admin-only candidate review statuses and audit events
 - [ ] Curated list of official provider sources
 - [ ] Scheduled discovery jobs
 - [ ] Duplicate detection
