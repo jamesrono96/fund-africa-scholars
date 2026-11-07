@@ -55,11 +55,84 @@ async function audit(db, adminId, action, type, id, details = {}) {
   await db.prepare("INSERT INTO audit_logs (id,actor_user_id,action,target_type,target_id,details_json) VALUES (?,?,?,?,?,?)")
     .bind(crypto.randomUUID(), adminId, action, type, id, JSON.stringify(details)).run();
 }
+
+function decodeText(value) {
+  return value.replace(/<[^>]*>/g," ").replace(/&amp;/gi,"&").replace(/&nbsp;/gi," ").replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/\\s+/g," ").trim();
+}
+async function limitedText(response, maxBytes = 900000) {
+  if (!response.body) return "";
+  const reader = response.body.getReader(); const chunks=[]; let size=0;
+  while (true) {
+    const {done,value}=await reader.read(); if(done) break;
+    size += value.byteLength;
+    if(size > maxBytes){await reader.cancel();throw new Error("Source page exceeded the scan size limit.");}
+    chunks.push(value);
+  }
+  const merged=new Uint8Array(size);let offset=0;
+  for(const chunk of chunks){merged.set(chunk,offset);offset+=chunk.byteLength;}
+  return new TextDecoder("utf-8",{fatal:false}).decode(merged);
+}
+async function scanSource(source, db, adminId) {
+  const runId=crypto.randomUUID();
+  await db.prepare("INSERT INTO discovery_runs (id,source_id,status,started_at,created_by) VALUES (?,?,'running',CURRENT_TIMESTAMP,?)").bind(runId,source.id,adminId).run();
+  try {
+    const pageUrl=httpsUrl(source.source_url);
+    if(!pageUrl || pageUrl.hostname.toLowerCase().replace(/^www\\./,"")!==source.official_domain.toLowerCase().replace(/^www\\./,"")) throw new Error("Registered source URL no longer matches its official domain.");
+    const response=await fetch(pageUrl.href,{method:"GET",redirect:"manual",headers:{"Accept":"text/html,application/xhtml+xml","User-Agent":"FundAfricaScholarsSourceChecker/1.0 (manual admin-triggered check)"}});
+    if(response.status>=300 && response.status<400) throw new Error("Source redirected. Update the registered URL after verifying the official destination.");
+    if(!response.ok) throw new Error("Official source returned HTTP "+response.status+".");
+    const type=response.headers.get("content-type")||"";
+    if(!type.toLowerCase().includes("text/html") && !type.toLowerCase().includes("application/xhtml+xml")) throw new Error("Source did not return an HTML page.");
+    const html=await limitedText(response);
+    const anchors=html.match(/<a\\b[^>]*>[\\s\\S]*?<\\/a>/gi)||[];
+    const keywords=/scholarship|fellowship|studentship|financial aid|funding opportunity|grant for students|bursary/i;
+    let found=0,duplicates=0,skipped=0;
+    for(const anchor of anchors.slice(0,3000)){
+      const hrefMatch=anchor.match(/\\bhref\\s*=\\s*(["'])(.*?)\\1/i);
+      if(!hrefMatch) continue;
+      const title=decodeText(anchor.replace(/^<a\\b[^>]*>/i,"").replace(/<\\/a>$/i,""));
+      if(!title || title.length<5 || title.length>180 || !keywords.test(title)) continue;
+      let candidateUrl;
+      try{candidateUrl=new URL(hrefMatch[2],pageUrl);}catch{skipped++;continue;}
+      if(candidateUrl.protocol!=="https:" || candidateUrl.hostname.toLowerCase().replace(/^www\\./,"")!==source.official_domain.toLowerCase().replace(/^www\\./,"") || candidateUrl.username || candidateUrl.password){skipped++;continue;}
+      candidateUrl.hash="";
+      const normalized=candidateUrl.origin.toLowerCase()+candidateUrl.pathname.replace(/\\/$/,"").toLowerCase();
+      const id=crypto.randomUUID(), fingerprint=await sha256([title.toLowerCase(),source.name.toLowerCase()].join("|"));
+      try{
+        await db.prepare("INSERT INTO scholarship_candidates (id,source_id,discovery_run_id,title,provider,destination_country,official_url,normalized_url,content_fingerprint,summary,extracted_data_json,review_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,'pending')")
+          .bind(id,source.id,runId,title,source.name,source.country,candidateUrl.href,normalized,fingerprint,"Link title found on registered official source page.",JSON.stringify({discovery_method:"same_domain_anchor_keyword_scan",requires_human_verification:true})).run();
+        found++;
+      }catch{duplicates++;}
+    }
+    await db.prepare("UPDATE discovery_runs SET status='completed',completed_at=CURRENT_TIMESTAMP,candidates_found=? WHERE id=?").bind(found,runId).run();
+    await db.prepare("UPDATE scholarship_sources SET last_checked_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(source.id).run();
+    await audit(db,adminId,"discovery.source_scanned","scholarship_source",source.id,{run_id:runId,candidates_found:found,duplicates,skipped});
+    return {run_id:runId,status:"completed",candidates_found:found,duplicates,skipped};
+  }catch(error){
+    await db.prepare("UPDATE discovery_runs SET status='failed',completed_at=CURRENT_TIMESTAMP,error_summary=? WHERE id=?").bind(String(error.message||"Scan failed").slice(0,500),runId).run();
+    await audit(db,adminId,"discovery.source_scan_failed","scholarship_source",source.id,{run_id:runId});
+    return {run_id:runId,status:"failed",error:"The source check failed. Review the registered page and try again."};
+  }
+}
+
 export async function handleDiscovery(request, env, url) {
   const mutation = ["POST", "PATCH", "DELETE"].includes(request.method);
   if (mutation && !originAllowed(request, env)) return json({ error: "Request origin is not allowed." }, 403);
   const admin = await requireAdmin(request, env.DB);
   if (!admin) return json({ error: "Administrator access required." }, 403);
+
+
+  const scanMatch=url.pathname.match(/^\\/api\\/admin\\/discovery\\/sources\\/([a-f0-9-]{36})\\/check$/i);
+  if(scanMatch && request.method==="POST"){
+    const source=await env.DB.prepare("SELECT id,name,official_domain,source_url,country,is_active FROM scholarship_sources WHERE id=?").bind(scanMatch[1]).first();
+    if(!source || !source.is_active) return json({error:"Active registered source not found."},404);
+    const result=await scanSource(source,env.DB,admin.id);
+    return json(result,result.status==="completed"?200:502);
+  }
+  if(url.pathname==="/api/admin/discovery/runs" && request.method==="GET"){
+    const rows=await env.DB.prepare("SELECT r.id,r.status,r.started_at,r.completed_at,r.candidates_found,r.error_summary,s.name AS source_name FROM discovery_runs r LEFT JOIN scholarship_sources s ON s.id=r.source_id ORDER BY r.created_at DESC LIMIT 100").all();
+    return json({runs:rows.results||[]});
+  }
 
   if (url.pathname === "/api/admin/discovery/sources" && request.method === "GET") {
     const rows = await env.DB.prepare("SELECT id,name,official_domain,source_url,source_type,country,check_frequency_days,notes,is_active,last_checked_at,created_at,updated_at FROM scholarship_sources ORDER BY name LIMIT 300").all();
