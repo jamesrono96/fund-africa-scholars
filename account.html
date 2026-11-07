@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Create your Fund Africa Scholars account or sign in.">
+<meta name="theme-color" content="#102c26">
+<title>Student Account | Fund Africa Scholars</title>
+<style>
+:root{--dark:#102c26;--green:#145c45;--lime:#c9ed79;--cream:#f7f8f2;--ink:#172d27;--muted:#65756d;--line:#e3e9df}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}a{color:inherit;text-decoration:none}.wrap{width:min(980px,calc(100% - 32px));margin:auto}.top{background:var(--dark);color:#fff}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800;display:flex;gap:10px;align-items:center}.mark{width:36px;height:36px;display:grid;place-items:center;background:var(--lime);color:var(--dark);border-radius:10px}.back{color:#d3e0d8;font-size:14px}.main{padding:52px 0 70px}.intro{max-width:650px;margin:0 auto 26px;text-align:center}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.intro h1{font-size:clamp(30px,5vw,43px);letter-spacing:-1.5px;line-height:1.12;margin:10px 0}.intro p{color:var(--muted);margin:0}.panel{max-width:560px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 18px 50px #173a210a}.tabs{display:flex;gap:8px;padding:4px;background:#f0f4ec;border-radius:10px;margin-bottom:22px}.tab{flex:1;border:0;background:transparent;padding:10px;border-radius:8px;font:inherit;font-weight:750;color:var(--muted);cursor:pointer}.tab[aria-selected=true]{background:#fff;color:var(--ink);box-shadow:0 1px 5px #0001}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;height:46px;border:1px solid #dce4da;border-radius:8px;padding:0 12px;font:inherit}.field input:focus{outline:2px solid #a6cc72;outline-offset:1px}.submit{width:100%;border:0;border-radius:9px;background:var(--green);color:#fff;font:inherit;font-weight:800;padding:13px;margin-top:8px;cursor:pointer}.submit:disabled{opacity:.55;cursor:wait}.message{min-height:22px;margin:12px 0 0;font-size:13px;color:var(--muted)}.message.error{color:#a22}.message.success{color:#17623e}.fine{font-size:12px;color:var(--muted);margin-top:16px}.dashboard{display:none}.profile{padding:18px;background:#f2f6ed;border-radius:12px;margin:16px 0}.profile strong{display:block;font-size:20px}.logout{border:1px solid var(--line);background:white;border-radius:8px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}.hidden{display:none!important}footer{padding:22px 0;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap nav"><a class="brand" href="index.html"><span class="mark">F</span>Fund Africa Scholars</a><a class="back" href="index.html">← Back to home</a></div></header>
+<main class="main"><div class="wrap">
+<div class="intro"><span class="eyebrow">Student access</span><h1>Your scholarship journey starts here.</h1><p>Create an account to prepare for saved scholarships and application tracking. Account services are not active until the backend is configured.</p></div>
+<section class="panel" aria-label="Student account">
+<div id="auth-panel">
+<div class="tabs" role="tablist" aria-label="Account options"><button class="tab" id="login-tab" role="tab" aria-selected="true" type="button">Sign in</button><button class="tab" id="register-tab" role="tab" aria-selected="false" type="button">Create account</button></div>
+<form id="login-form">
+<div class="field"><label for="login-email">Email address</label><input id="login-email" type="email" autocomplete="email" maxlength="254" required></div>
+<div class="field"><label for="login-password">Password</label><input id="login-password" type="password" autocomplete="current-password" maxlength="128" required></div>
+<button class="submit" type="submit">Sign in</button>
+</form>
+<form id="register-form" class="hidden">
+<div class="field"><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" minlength="2" maxlength="100" required></div>
+<div class="field"><label for="register-email">Email address</label><input id="register-email" type="email" autocomplete="email" maxlength="254" required></div>
+<div class="field"><label for="country">Country of residence (optional)</label><input id="country" type="text" autocomplete="country-name" maxlength="80"></div>
+<div class="field"><label for="register-password">Create password (at least 12 characters)</label><input id="register-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>
+<button class="submit" type="submit">Create student account</button>
+</form>
+<p class="message" id="auth-message" role="status" aria-live="polite"></p>
+<p class="fine">Never share your password. Membership payments are not collected on this preview.</p>
+</div>
+<div id="dashboard" class="dashboard">
+<span class="eyebrow">Student dashboard</span><h2>Welcome to your account</h2>
+<div class="profile"><strong id="profile-name"></strong><span id="profile-email"></span><p id="profile-country"></p></div>
+<p>Your saved scholarships and application tracker will appear here as those features are implemented.</p>
+<button class="logout" id="logout-button" type="button">Sign out</button>
+<p class="message" id="dashboard-message" role="status"></p>
+</div>
+</section>
+</div></main>
+<footer><div class="wrap">© <span id="year"></span> Fund Africa Scholars · Always confirm scholarship details with the official provider.</div></footer>
+<script src="assets/js/account.js" defer></script>
+</body></html>
