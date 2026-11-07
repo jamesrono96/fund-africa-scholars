@@ -167,7 +167,7 @@ class StudentMockD1 extends MockD1 {
       bind: (...values) => { statement.values = values; return prepared; },
       first: async () => {
         if (sql.includes("FROM sessions JOIN users")) return {
-          id: "student-1", email: "student@example.test", full_name: "Test Student", country_of_residence: "Kenya"
+          id: "student-1", email: "student@example.test", full_name: "Test Student", country_of_residence: "Kenya", preferred_destinations: '["Canada"]'
         };
         if (sql.includes("FROM scholarships WHERE id =")) return null;
         if (sql.includes("FROM applications WHERE id = ? AND user_id = ?")) return null;
@@ -221,7 +221,7 @@ test("students can read their own profile without exposing editable email", asyn
   const data = await response.json();
   assert.equal(data.profile.email, "student@example.test");
   assert.equal(data.profile.full_name, "Test Student");
-  assert.deepEqual(data.profile.preferred_destinations, []);
+  assert.deepEqual(data.profile.preferred_destinations, ["Canada"]);
   assert.ok(db.statements.some(item => item.sql.includes("preferred_destinations")));
 });
 
@@ -284,7 +284,7 @@ test("student recommendations are private and limited to preferred verified dest
     item.sql.includes("destination_country IN (SELECT value FROM json_each(?))") &&
     item.sql.includes("publication_status = 'published'") &&
     item.sql.includes("verification_status = 'verified'") &&
-    item.values[0] === "[]"
+    item.values[0] === '["Canada"]'
   ));
 });
 
