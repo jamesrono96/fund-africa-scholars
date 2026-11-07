@@ -146,3 +146,67 @@ test("changing an official source requires resetting verification and publicatio
   assert.equal(response.status, 409);
   assert.match((await response.json()).error, /resetting verification_status/);
 });
+
+function studentRequest(path, method, body) {
+  return request(path, {
+    method,
+    headers: {
+      cookie: "fas_session=valid-test-session",
+      origin: "https://app.example.test",
+      ...(body ? { "content-type": "application/json" } : {})
+    },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  });
+}
+
+class StudentMockD1 extends MockD1 {
+  prepare(sql) {
+    const statement = { sql, values: [] };
+    this.statements.push(statement);
+    const prepared = {
+      bind: (...values) => { statement.values = values; return prepared; },
+      first: async () => {
+        if (sql.includes("FROM sessions JOIN users")) return {
+          id: "student-1", email: "student@example.test", full_name: "Test Student", country_of_residence: "Kenya"
+        };
+        if (sql.includes("FROM scholarships WHERE id =")) return null;
+        if (sql.includes("FROM applications WHERE id = ? AND user_id = ?")) return null;
+        return null;
+      },
+      all: async () => ({ results: [] }),
+      run: async () => ({ meta: { changes: 0 } })
+    };
+    return prepared;
+  }
+}
+
+test("students cannot save a scholarship that is not verified and published", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/saved", "POST", {
+    scholarship_id: "not-public-scholarship"
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 404);
+  assert.match((await response.json()).error, /not available to save/);
+  assert.ok(db.statements.some(item => item.sql.includes("publication_status = 'published'") && item.sql.includes("verification_status = 'verified'")));
+});
+
+test("students cannot track a scholarship that is not verified and published", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/applications", "POST", {
+    scholarship_id: "not-public-scholarship",
+    status: "interested"
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 404);
+  assert.match((await response.json()).error, /not available for tracking/);
+  assert.ok(db.statements.some(item => item.sql.includes("publication_status = 'published'") && item.sql.includes("verification_status = 'verified'")));
+});
+
+test("students cannot update another user's application", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/applications/another-users-id", "PATCH", {
+    status: "submitted"
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 404);
+  assert.match((await response.json()).error, /Application not found/);
+  assert.ok(db.statements.some(item => item.sql.includes("WHERE id = ? AND user_id = ?")));
+});
