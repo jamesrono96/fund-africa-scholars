@@ -86,7 +86,8 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [ ] AI-assisted structured extraction with source citations and calibrated confidence scoring
 - [x] Track candidate-page snapshots, last checked date and source changes (manual checks)
 - [x] Move changed candidates to human review and expose snapshot history
-- [ ] Human approval for uncertain or changed records
+- [x] Human approve/reject decisions for individual extracted fields, with evidence, source URL, reviewer and timestamp audit trail
+- [ ] Human approval for uncertain or changed records (full scholarship-level verification and publication checklist still required)
 - [ ] Notifications for saved opportunities and approaching deadlines
 
 **Acceptance:** automated discovery never silently publishes an uncertain scholarship as verified.
