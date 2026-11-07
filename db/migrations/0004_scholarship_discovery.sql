@@ -6,7 +6,8 @@ ALTER TABLE scholarship_sources ADD COLUMN source_type TEXT NOT NULL DEFAULT 'un
 ALTER TABLE scholarship_sources ADD COLUMN country TEXT;
 ALTER TABLE scholarship_sources ADD COLUMN check_frequency_days INTEGER NOT NULL DEFAULT 14;
 ALTER TABLE scholarship_sources ADD COLUMN notes TEXT;
-ALTER TABLE scholarship_sources ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE scholarship_sources ADD COLUMN updated_at TEXT;
+UPDATE scholarship_sources SET updated_at = COALESCE(created_at, CURRENT_TIMESTAMP) WHERE updated_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS discovery_runs (
   id TEXT PRIMARY KEY,
