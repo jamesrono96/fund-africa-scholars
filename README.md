@@ -19,9 +19,12 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Repository structure
 
-- `index.html` — current responsive landing-page preview
+- `index.html` — responsive landing-page preview
+- `account.html` — student sign-in and registration interface
+- `assets/js/account.js` — account page interactions and API client
 - `db/schema.sql` — initial relational database schema
-- `worker/index.js` — API foundation for a future Cloudflare Worker
+- `worker/index.js` — API foundation with scholarship listing and student authentication endpoints
+- `db/migrations/0002_auth_rate_limits.sql` — rate-limit table migration
 - `wrangler.toml` — local/deployment configuration template (not deployed)
 - `docs/ROADMAP.md` — build sequence and completion criteria
 
@@ -35,6 +38,6 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Local development
 
-The initial landing page can be previewed by opening `index.html` in a browser. The API and database are scaffolding only until their environment and authentication are configured.
+The initial landing page can be previewed by opening `index.html` in a browser. The account interface and API endpoints are implemented as development foundations. The database migration still needs to be applied, and the API must be configured and tested in a development environment before accounts can work. The API and database are not live.
 
 See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence.
