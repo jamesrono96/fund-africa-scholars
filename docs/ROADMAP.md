@@ -87,7 +87,10 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Track candidate-page snapshots, last checked date and source changes (manual checks)
 - [x] Move changed candidates to human review and expose snapshot history
 - [x] Human approve/reject decisions for individual extracted fields, with evidence, source URL, reviewer and timestamp audit trail
-- [ ] Human approval for uncertain or changed records (full scholarship-level verification and publication checklist still required)
+- [x] Seven-item scholarship-level evidence checklist in admin dashboard
+- [x] Server-side verification/publication gate requiring all checklist items confirmed or not applicable
+- [x] Return scholarship to needs-review/draft if a checklist item needs follow-up
+- [ ] Human approval for uncertain or changed records (operational review and testing still required)
 - [ ] Notifications for saved opportunities and approaching deadlines
 
 **Acceptance:** automated discovery never silently publishes an uncertain scholarship as verified.
