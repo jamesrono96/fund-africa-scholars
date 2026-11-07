@@ -38,6 +38,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - `db/migrations/0003_admin_setup_template.sql` — owner-only admin role setup template
 - `db/migrations/0004_scholarship_discovery.sql` — discovery sources, runs and candidate queue
 - `db/migrations/0005_candidate_source_snapshots.sql` — official-page snapshot and change history
+- `db/migrations/0006_candidate_field_reviews.sql` — append-only administrator decisions on individual extracted fields
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
 - `wrangler.toml` — local/deployment configuration template (not deployed)
 - `docs/ROADMAP.md` — build sequence and completion criteria
@@ -87,3 +88,8 @@ Manual extraction now stores structured funding, study-level, eligibility and de
 ### Optional AI-assisted candidate review
 
 The admin API includes an optional Workers AI review route at `POST /api/admin/discovery/candidates/:id/ai-extract`. It is inactive unless a Workers AI binding named `AI` is configured in a development environment. The model can be selected with the non-secret `AI_MODEL` environment variable; the code has a default model identifier that must be confirmed against the account's enabled Workers AI models. The route fetches only the candidate's registered official HTTPS page, treats page text as untrusted input, asks for JSON suggestions with exact quotations, and discards suggestions whose evidence is not found verbatim in the fetched text. Rule-based extraction results are preserved alongside AI results. This is an optional integration foundation, not a live AI feature: no binding is enabled here, no credentials are stored in GitHub, and the route has not been tested against a configured AI account. AI output remains unverified and cannot publish scholarships.
+
+
+### Field-level evidence review
+
+The candidate queue now supports individual approve/reject decisions for rule-based and AI-assisted funding, study-level, eligibility and deadline suggestions. Each decision records the reviewer, timestamp, exact evidence excerpt and candidate official URL in an append-only review table. These decisions are an audit trail only: they do not copy values into scholarship records, mark a scholarship verified, or publish it. Apply migration `0006_candidate_field_reviews.sql` in the development database before using this feature.
