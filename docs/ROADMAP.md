@@ -34,7 +34,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [ ] Apply migration and configure a development database
 - [ ] Email verification and password reset
 - [ ] Add CSRF protections and production security review
-- [ ] Student profile and preferences
+- [x] Student profile and study-destination preferences API and dashboard interface (backend configuration pending)
 - [x] Saved-scholarships API with per-user ownership checks (backend configuration pending)
 - [x] Application-tracker API with per-user ownership checks (backend configuration pending)
 - [x] Student dashboard interface for saved opportunities, status updates and private notes
