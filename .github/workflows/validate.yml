@@ -24,7 +24,9 @@ jobs:
           for file in worker/*.js assets/js/*.js; do
             node --check "$file"
           done
-      - name: Run Worker API security smoke tests\n        run: npm test\n      - name: Validate SQLite schema and migrations
+      - name: Run Worker API security smoke tests
+        run: npm test
+      - name: Validate SQLite schema and migrations
         run: |
           python3 - <<'PY'
           import pathlib
