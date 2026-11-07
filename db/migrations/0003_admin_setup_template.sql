@@ -1,0 +1,13 @@
+-- OWNER ACTION REQUIRED — do not run until your own account exists.
+-- First confirm the account email and user ID:
+-- SELECT id, email, role FROM users WHERE email = 'YOUR_LOGIN_EMAIL';
+--
+-- Then replace the placeholder below with your own exact login email and run:
+-- UPDATE users SET role = 'admin', updated_at = CURRENT_TIMESTAMP
+-- WHERE email = 'YOUR_LOGIN_EMAIL';
+--
+-- Verify that exactly one account has administrator access:
+-- SELECT id, email, role FROM users WHERE role = 'admin';
+--
+-- Never expose an admin-promotion endpoint to the public internet.
+-- Do not commit your actual email address or credentials into this file.
