@@ -172,12 +172,38 @@ export async function handleAdmin(request, env, url) {
     const d = checked.value;
     const old = await env.DB.prepare("SELECT id,verification_status,publication_status FROM scholarships WHERE id = ?").bind(id).first();
     if (!old) return json({ error: "Scholarship not found." }, 404);
+    const officialUrlChanged = Object.prototype.hasOwnProperty.call(d, "official_url");
+    if (officialUrlChanged) {
+      const current = await env.DB.prepare("SELECT official_url FROM scholarships WHERE id = ?").bind(id).first();
+      if (current && d.official_url !== current.official_url) {
+        if (d.verification_status !== "pending" || d.publication_status !== "draft") {
+          return json({ error: "Changing the official source requires resetting verification_status to pending and publication_status to draft in the same update. All evidence must then be reviewed again." }, 409);
+        }
+      }
+    }
     const verification = d.verification_status ?? old.verification_status;
     const publication = d.publication_status ?? old.publication_status;
+    if (publication === "published" && old.publication_status !== "published" && old.verification_status !== "verified") {
+      return json({ error: "Save verification as a separate step before publishing the scholarship." }, 400);
+    }
     if (verification === "verified" || publication === "published") {
-      const checklist=await env.DB.prepare("SELECT COUNT(*) AS total FROM scholarship_verification_checks WHERE scholarship_id=? AND decision IN ('confirmed','not_applicable') AND evidence_excerpt<>'' AND evidence_url<>''").bind(id).first();
-      if(Number(checklist?.total||0)!==7)return json({error:"All seven evidence-backed verification checklist items must be confirmed or marked not applicable before verification or publication."},400);
-      if(verification!=="verified")return json({error:"A scholarship must be marked verified before publication."},400);
+      const checklist = await env.DB.prepare("SELECT check_key, decision, evidence_url, evidence_excerpt FROM scholarship_verification_checks WHERE scholarship_id = ?").bind(id).all();
+      const checks = checklist.results || [];
+      const expected = ["official_source", "current_intake", "eligible_nationalities", "study_level", "funding_terms", "application_deadline", "application_route"];
+      const byKey = new Map(checks.map(item => [item.check_key, item]));
+      let officialHost = "";
+      try { officialHost = new URL(d.official_url || (await env.DB.prepare("SELECT official_url FROM scholarships WHERE id = ?").bind(id).first())?.official_url || "").hostname.toLowerCase(); } catch {}
+      const complete = expected.every(key => {
+        const item = byKey.get(key);
+        if (!item || !["confirmed", "not_applicable"].includes(item.decision) || !item.evidence_excerpt?.trim()) return false;
+        try {
+          const evidence = new URL(item.evidence_url);
+          return evidence.protocol === "https:" && evidence.hostname.toLowerCase() === officialHost &&
+            (item.decision !== "not_applicable" || key === "application_deadline");
+        } catch { return false; }
+      });
+      if (!complete) return json({ error: "All seven checklist items must have valid evidence from the current official HTTPS domain. Only the application deadline may be marked not applicable." }, 400);
+      if (verification !== "verified") return json({ error: "A scholarship must be marked verified before publication." }, 400);
     }
     const fields = Object.keys(d);
     if (!fields.length) return json({ error: "No valid fields supplied." }, 400);
