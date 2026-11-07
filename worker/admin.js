@@ -105,7 +105,8 @@ async function audit(db, adminId, action, id, fields = []) {
     .bind(crypto.randomUUID(), adminId, action, id, JSON.stringify({ changed_fields: fields })).run();
 }
 export async function handleAdmin(request, env, url) {
-  if (!originAllowed(request, env)) return json({ error: "Request origin is not allowed." }, 403);
+  const isMutation = request.method === "POST" || request.method === "PATCH" || request.method === "DELETE";
+  if (isMutation && !originAllowed(request, env)) return json({ error: "Request origin is not allowed." }, 403);
   const admin = await adminUser(request, env.DB);
   if (!admin) return json({ error: "Administrator access required." }, 403);
 
