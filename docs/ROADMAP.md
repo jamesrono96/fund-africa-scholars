@@ -16,7 +16,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Search by keyword, destination country and study level
 - [x] Scholarship cards showing provider, funding, eligibility, deadline and official source
 - [x] Individual scholarship detail page and verified detail API
-- [ ] Filters for funding type, eligibility and deadline
+- [x] Filters for funding type, eligibility keyword and deadline window
 - [x] Loading, empty and error states
 - [ ] Pagination
 - [x] Official source link, source checked date and verification status
