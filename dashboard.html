@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Manage saved scholarships and track your applications with Fund Africa Scholars.">
+<meta name="theme-color" content="#102c26"><title>Student Dashboard | Fund Africa Scholars</title>
+<style>
+:root{--dark:#102c26;--green:#145c45;--lime:#c9ed79;--cream:#f7f8f2;--ink:#172d27;--muted:#65756d;--line:#e3e9df}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}a{color:inherit;text-decoration:none}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}.top{background:var(--dark);color:white}.nav{height:70px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800}.nav a:last-child{color:#d3e0d8;font-size:14px}.main{padding:42px 0 70px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}.heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:24px}.heading h1{font-size:clamp(30px,5vw,42px);letter-spacing:-1.4px;margin:7px 0}.heading p{color:var(--muted);margin:0}.btn{border:0;border-radius:8px;background:var(--green);color:#fff;padding:11px 15px;font:inherit;font-weight:750;cursor:pointer}.btn.secondary{background:white;color:var(--green);border:1px solid var(--line)}.tabs{display:flex;gap:8px;margin:24px 0 16px}.tab{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 15px;font:inherit;font-weight:750;cursor:pointer}.tab[aria-selected=true]{background:var(--dark);color:white;border-color:var(--dark)}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:22px;min-height:170px}.list{display:grid;gap:12px}.item{border:1px solid var(--line);border-radius:11px;padding:16px;display:grid;gap:8px}.item h3{margin:0;font-size:18px}.meta{color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.actions select,.actions textarea{border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit}.actions textarea{width:100%;min-height:60px}.message{color:var(--muted);font-size:14px;min-height:22px}.error{color:#a22}.empty{padding:24px;text-align:center;color:var(--muted)}.hidden{display:none!important}@media(max-width:650px){.heading{display:block}.heading .btn{margin-top:15px}}
+</style></head>
+<body><header class="top"><div class="wrap nav"><a class="brand" href="index.html">Fund Africa Scholars</a><a href="account.html">Account &amp; sign out</a></div></header>
+<main class="main"><div class="wrap">
+<div class="heading"><div><span class="eyebrow">Student workspace</span><h1 id="welcome">Your scholarship dashboard</h1><p id="profile-line">Loading your account…</p></div><a class="btn" href="directory.html">Explore scholarships</a></div>
+<div class="tabs" role="tablist" aria-label="Dashboard sections"><button class="tab" id="saved-tab" aria-selected="true" type="button">Saved scholarships</button><button class="tab" id="apps-tab" aria-selected="false" type="button">Application tracker</button></div>
+<section class="panel"><p id="status" class="message" role="status" aria-live="polite">Connecting to your account…</p><div id="saved-list" class="list"></div><div id="apps-list" class="list hidden"></div></section>
+</div></main>
+<script src="assets/js/dashboard.js" defer></script></body></html>
