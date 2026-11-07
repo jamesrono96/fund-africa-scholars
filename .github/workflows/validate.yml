@@ -1,0 +1,58 @@
+name: Validate application foundation
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          for file in worker/*.js assets/js/*.js; do
+            node --check "$file"
+          done
+      - name: Validate SQLite schema and migrations
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import sqlite3
+
+          db = sqlite3.connect(":memory:")
+          db.execute("PRAGMA foreign_keys = ON")
+          db.executescript(pathlib.Path("db/schema.sql").read_text())
+          for migration in sorted(pathlib.Path("db/migrations").glob("*.sql")):
+              if migration.name == "0003_admin_setup_template.sql":
+                  continue
+              print(f"Applying {migration.name}")
+              db.executescript(migration.read_text())
+          integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
+          foreign_keys = db.execute("PRAGMA foreign_key_check").fetchall()
+          assert integrity == "ok", integrity
+          assert not foreign_keys, foreign_keys
+          expected = {
+              "candidate_field_reviews",
+              "scholarship_verification_checks",
+              "candidate_source_snapshots",
+              "scholarship_candidates",
+              "discovery_runs",
+          }
+          actual = {row[0] for row in db.execute(
+              "SELECT name FROM sqlite_master WHERE type='table'"
+          )}
+          missing = expected - actual
+          assert not missing, f"Missing tables: {sorted(missing)}"
+          print("SQLite schema and migrations passed.")
+          PY
