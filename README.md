@@ -77,3 +77,8 @@ Each manual candidate-page extraction stores a SHA-256 content fingerprint, page
 ### Candidate detail extraction
 
 Administrators can request a bounded HTML inspection of a candidate page on its registered official domain. The current rule-based helper captures page title/description and possible funding, study-level, eligibility and deadline clues into the private candidate record. It does not infer a confirmed deadline from ambiguous text, does not call an AI model, and does not publish anything. Administrators must compare every suggestion with the official page before editing or verifying a scholarship.
+
+
+### Evidence-backed extraction suggestions
+
+Manual extraction now stores structured funding, study-level, eligibility and deadline clues with short evidence excerpts from the fetched official page. Each clue has a conservative review-confidence label and an explanation of why it received that label. Date-shaped strings are deliberately not treated as confirmed deadlines, and the helper does not assign automatic high confidence. This is deterministic rule-based extraction, not an AI model; every suggestion requires human verification. An AI provider/model integration remains a separate future task and must preserve source evidence and human approval.
