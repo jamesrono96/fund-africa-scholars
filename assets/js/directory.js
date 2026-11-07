@@ -34,8 +34,10 @@ function render(items){
 }
 async function search(event){
  if(event)event.preventDefault();
- const params=new URLSearchParams();const q=$("q").value.trim(),country=$("country").value.trim(),level=$("level").value;
- if(q)params.set("q",q);if(country)params.set("country",country);if(level)params.set("level",level);params.set("limit","50");
+ const params=new URLSearchParams();
+ const values={q:$("q").value.trim(),country:$("country").value.trim(),level:$("level").value,subject:$("subject").value.trim(),funding:$("funding").value,deadline:$("deadline").value,eligibility:$("eligibility").value.trim()};
+ for(const [key,value] of Object.entries(values)){if(value)params.set(key,value);}
+ params.set("limit","50");
  $("status").textContent="Searching verified listings…";$("count").textContent="";$("results").replaceChildren(node("div","Searching…","empty"));
  try{
   const response=await fetch(API_BASE+"/api/scholarships?"+params.toString(),{headers:{Accept:"application/json"},credentials:"omit"});
