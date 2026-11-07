@@ -81,7 +81,9 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder
 - [x] Rule-based official-page extraction suggestions for eligibility, funding, study levels and deadline clues (manual review required)
 - [x] Evidence-backed structured extraction suggestions with excerpts and conservative review-confidence labels (rule-based)
-- [x] Optional Workers AI extraction route and admin action with exact-quote evidence checks (configuration and testing pending)\n- [ ] Configure and test Workers AI binding/model in a private development environment\n- [ ] AI-assisted structured extraction with source citations and calibrated confidence scoring
+- [x] Optional Workers AI extraction route and admin action with exact-quote evidence checks (configuration and testing pending)
+- [ ] Configure and test Workers AI binding/model in a private development environment
+- [ ] AI-assisted structured extraction with source citations and calibrated confidence scoring
 - [x] Track candidate-page snapshots, last checked date and source changes (manual checks)
 - [x] Move changed candidates to human review and expose snapshot history
 - [ ] Human approval for uncertain or changed records
