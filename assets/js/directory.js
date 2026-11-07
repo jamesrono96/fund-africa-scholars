@@ -6,8 +6,8 @@ const $=id=>document.getElementById(id);
 $("year").textContent=new Date().getFullYear();
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeArray(value){try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch{return [];}}
-function render(items){
- const root=$("results");root.replaceChildren();$("count").textContent=items.length+" opportunities";
+function render(items, rootId="results", countId="count"){
+ const root=$(rootId);root.replaceChildren();if(countId)$.textContent=items.length+" opportunities";
  if(!items.length){root.append(node("div","No verified scholarships match these filters yet. Try another search later.","empty"));return;}
  for(const item of items){
   const card=node("article",undefined,"card");
@@ -32,6 +32,20 @@ function render(items){
   foot.append(link,checked);card.append(foot);root.append(card);
  }
 }
+async function loadRecommendations(){
+ try{
+  const response=await fetch(API_BASE+"/api/student/recommendations",{headers:{Accept:"application/json"},credentials:"include"});
+  if(!response.ok)return;
+  const data=await response.json();
+  if(!Array.isArray(data.scholarships)||!data.scholarships.length){
+   if(data.message){$("recommendations").classList.remove("hidden");$("recommendation-note").textContent=data.message+" You can update these in your student dashboard.";}
+   return;
+  }
+  $("recommendations").classList.remove("hidden");
+  $("recommendation-note").textContent="Matched to your preferred destinations: "+(data.based_on||[]).join(", ")+". These are destination matches, not an eligibility assessment.";
+  render(data.scholarships,"recommended-results",null);
+ }catch{/* Recommendations are optional; public directory remains available. */}
+}
 async function search(event){
  if(event)event.preventDefault();
  const params=new URLSearchParams();
@@ -48,4 +62,5 @@ async function search(event){
 }
 $("filter-form").addEventListener("submit",search);
 search();
+loadRecommendations();
 })();
