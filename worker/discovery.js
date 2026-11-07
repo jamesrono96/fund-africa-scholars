@@ -331,6 +331,27 @@ export async function handleDiscovery(request, env, url) {
     try{const result=await aiExtractCandidate(aiExtractMatch[1],env,admin.id);return json(result,result.status||200);}
     catch{return json({error:"AI-assisted inspection failed. No scholarship was published."},502);}
   }
+  const fieldReviewMatch=url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/field-reviews$/i);
+  if(fieldReviewMatch && request.method==="GET"){
+    const rows=await env.DB.prepare("SELECT id,field_key,suggested_value,evidence_text,source_url,decision,reviewer_id,reviewed_at FROM candidate_field_reviews WHERE candidate_id=? ORDER BY reviewed_at DESC LIMIT 200").bind(fieldReviewMatch[1]).all();
+    return json({reviews:rows.results||[]});
+  }
+  if(fieldReviewMatch && request.method==="POST"){
+    const candidate=await env.DB.prepare("SELECT id,official_url FROM scholarship_candidates WHERE id=?").bind(fieldReviewMatch[1]).first();
+    if(!candidate)return json({error:"Candidate not found."},404);
+    const parsed=await readBody(request);if(parsed.error)return json({error:parsed.error},400);
+    const b=parsed.body;
+    const field=clean(b.field_key,30,true),value=clean(b.suggested_value,500,true),evidence=clean(b.evidence_text,1200,true),decision=b.decision;
+    if(!["funding","study_levels","eligibility","deadlines"].includes(field)||!value||!evidence||!["approved","rejected"].includes(decision))return json({error:"Provide a valid field, suggestion, evidence excerpt and approve/reject decision."},400);
+    const sourceUrl=clean(b.source_url,2048,true),parsedSource=sourceUrl&&httpsUrl(sourceUrl);
+    if(!parsedSource||parsedSource.href!==candidate.official_url)return json({error:"Review evidence must reference this candidate's registered official URL."},400);
+    const id=crypto.randomUUID();
+    await env.DB.prepare("INSERT INTO candidate_field_reviews (id,candidate_id,field_key,suggested_value,evidence_text,source_url,decision,reviewer_id) VALUES (?,?,?,?,?,?,?,?)")
+      .bind(id,candidate.id,field,value,evidence,parsedSource.href,decision,admin.id).run();
+    await audit(env.DB,admin.id,"discovery.candidate_field_reviewed","scholarship_candidate",candidate.id,{field_key:field,decision,review_id:id});
+    return json({id,decision,message:"Field-level review recorded. This decision does not verify or publish the scholarship."},201);
+  }
+
   const draftMatch = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/create-draft$/i);
   if (draftMatch && request.method === "POST") {
     const candidate = await env.DB.prepare("SELECT * FROM scholarship_candidates WHERE id = ?").bind(draftMatch[1]).first();
