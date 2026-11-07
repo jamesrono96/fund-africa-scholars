@@ -115,6 +115,46 @@ async function scanSource(source, db, adminId) {
   }
 }
 
+
+function htmlText(html) {
+  return decodeText(html.replace(/<script\b[\s\S]*?<\/script>/gi," ").replace(/<style\b[\s\S]*?<\/style>/gi," ").replace(/<[^>]+>/g," "));
+}
+function metaContent(html, key) {
+  const a = '<meta[^>]+(?:name|property)=["\\x27]' + key + '["\\x27][^>]+content=["\\x27]([^"\\x27]*)["\\x27]';
+  const b = '<meta[^>]+content=["\\x27]([^"\\x27]*)["\\x27][^>]+(?:name|property)=["\\x27]' + key + '["\\x27]';
+  const first=html.match(new RegExp(a,"i"))||html.match(new RegExp(b,"i"));
+  return first?decodeText(first[1]):"";
+}
+function extractScholarshipFields(html, candidate) {
+  const text=htmlText(html).slice(0,18000);
+  const titleMatch=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const pageTitle=titleMatch?decodeText(titleMatch[1]):"";
+  const description=metaContent(html,"description")||metaContent(html,"og:description");
+  const fundingMatches=[...text.matchAll(/(?:fully funded|full scholarship|tuition fee(?:s)?|tuition waiver|living stipend|monthly stipend|travel allowance|accommodation|partially funded)/gi)].slice(0,12).map(m=>m[0]);
+  const levelMatches=[...new Set((text.match(/\b(?:undergraduate|bachelor'?s?|master'?s?|postgraduate|doctoral|PhD|doctorate|postdoctoral)\b/gi)||[]).map(v=>v.toLowerCase()))].slice(0,10);
+  const eligibility=[];
+  for(const match of text.matchAll(/.{0,100}\b(?:eligible|eligibility|applicants? must|citizens? of|nationality|minimum requirement|must have)\b.{0,180}/gi)){eligibility.push(match[0].trim());if(eligibility.length>=8)break;}
+  const dateMatches=[...text.matchAll(/\b(?:deadline|apply by|applications close|closing date)\b[^.\n]{0,90}/gi)].slice(0,8).map(m=>m[0].trim());
+  const isoDates=[...new Set((text.match(/\b20\d{2}-\d{2}-\d{2}\b/g)||[]))].slice(0,10);
+  return {page_title:pageTitle||candidate.title,description,funding_phrases:[...new Set(fundingMatches)],study_level_mentions:levelMatches,eligibility_snippets:eligibility,deadline_text:dateMatches,dates_found:isoDates,extraction_method:"rule_based_html_review_assist",requires_human_verification:true};
+}
+async function extractCandidate(candidateId, db, adminId) {
+  const candidate=await db.prepare("SELECT c.*,s.official_domain FROM scholarship_candidates c LEFT JOIN scholarship_sources s ON s.id=c.source_id WHERE c.id=?").bind(candidateId).first();
+  if(!candidate)return {error:"Candidate not found.",status:404};
+  const pageUrl=httpsUrl(candidate.official_url);
+  if(!pageUrl || !candidate.official_domain || pageUrl.hostname.toLowerCase().replace(/^www\./,"")!==candidate.official_domain.toLowerCase().replace(/^www\./,""))return {error:"Candidate is not linked to a registered official source domain.",status:400};
+  const response=await fetch(pageUrl.href,{method:"GET",redirect:"manual",headers:{"Accept":"text/html,application/xhtml+xml","User-Agent":"FundAfricaScholarsReviewAssistant/1.0"}});
+  if(response.status>=300&&response.status<400)return {error:"The page redirected. Verify and update the source URL manually.",status:409};
+  if(!response.ok)return {error:"Official page returned HTTP "+response.status+".",status:502};
+  const contentType=response.headers.get("content-type")||"";
+  if(!/text\/html|application\/xhtml\+xml/i.test(contentType))return {error:"Official page did not return HTML.",status:415};
+  const html=await limitedText(response,900000);
+  const extracted=extractScholarshipFields(html,candidate);
+  await db.prepare("UPDATE scholarship_candidates SET summary=CASE WHEN ?<>'' THEN ? ELSE summary END,extracted_data_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(extracted.description,extracted.description,JSON.stringify(extracted),candidateId).run();
+  await audit(db,adminId,"discovery.candidate_extracted","scholarship_candidate",candidateId,{method:extracted.extraction_method,eligibility_snippets:extracted.eligibility_snippets.length,deadline_text:extracted.deadline_text.length});
+  return {candidate_id:candidateId,extracted,message:"Extraction suggestions saved for human review. No scholarship facts were verified or published."};
+}
+
 export async function handleDiscovery(request, env, url) {
   const mutation = ["POST", "PATCH", "DELETE"].includes(request.method);
   if (mutation && !originAllowed(request, env)) return json({ error: "Request origin is not allowed." }, 403);
@@ -185,6 +225,11 @@ export async function handleDiscovery(request, env, url) {
   }
 
   const match = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})$/i);
+  const extractMatch=url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/extract$/i);
+  if(extractMatch && request.method==="POST"){
+    try{const result=await extractCandidate(extractMatch[1],env.DB,admin.id);return json(result,result.status||200);}
+    catch{return json({error:"Unable to inspect the official page. Check the source and try again."},502);}
+  }
   const draftMatch = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/create-draft$/i);
   if (draftMatch && request.method === "POST") {
     const candidate = await env.DB.prepare("SELECT * FROM scholarship_candidates WHERE id = ?").bind(draftMatch[1]).first();
