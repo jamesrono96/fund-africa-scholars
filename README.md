@@ -8,7 +8,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Planned features
 
-- Scholarship directory with destination, study level, subject, funding and deadline filters
+- Scholarship directory with destination, study level, subject, funding, eligibility and deadline filters
 - Scholarship detail pages with official source links and verification dates
 - Student registration, login and profile management
 - Saved scholarships and application tracking
