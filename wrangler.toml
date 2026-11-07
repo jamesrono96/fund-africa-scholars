@@ -4,6 +4,9 @@ main = "worker/index.js"
 compatibility_date = "2026-11-07"
 
 # Create and bind a D1 database only when ready to configure a development environment.
+# Workers AI is optional. Uncomment only in a development environment after enabling it.
+# [ai]
+# binding = "AI"
 # [[d1_databases]]
 # binding = "DB"
 # database_name = "fund-africa-scholars-dev"
