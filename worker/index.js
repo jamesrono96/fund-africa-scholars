@@ -1,3 +1,5 @@
+import { handleAdmin } from "./admin.js";
+
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
@@ -24,7 +26,7 @@ function corsHeaders(request, env) {
   return {
     "access-control-allow-origin": env.APP_ORIGIN,
     "access-control-allow-credentials": "true",
-    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-methods": "GET, POST, PATCH, DELETE, OPTIONS",
     "access-control-allow-headers": "Content-Type",
     "vary": "Origin"
   };
@@ -301,6 +303,11 @@ export default {
       if (url.pathname === "/api/auth/me" && request.method === "GET") {
         const user = await currentUser(request, env.DB);
         return user ? json({ user: publicUser(user) }, 200, cors) : json({ error: "Not signed in." }, 401, cors);
+      }
+
+      if (url.pathname.startsWith("/api/admin/scholarships")) {
+        const response = await handleAdmin(request, env, url);
+        return withCors(response, cors);
       }
 
       if (url.pathname === "/api/scholarships" && request.method === "GET") {
