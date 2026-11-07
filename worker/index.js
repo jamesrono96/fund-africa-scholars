@@ -311,6 +311,21 @@ export default {
         return withCors(response, cors);
       }
 
+      if (url.pathname.startsWith("/api/scholarships/") && request.method === "GET") {
+        const scholarshipId = decodeURIComponent(url.pathname.slice("/api/scholarships/".length));
+        if (!scholarshipId || scholarshipId.length > 80) return json({ error: "Invalid scholarship id." }, 400, cors);
+        const scholarship = await env.DB.prepare(`
+          SELECT id, title, provider, destination_country, study_levels,
+                 subject_areas, funding_type, funding_details, eligibility_summary,
+                 application_deadline, official_url, source_checked_at
+          FROM scholarships
+          WHERE id = ? AND publication_status = 'published'
+            AND verification_status = 'verified'
+          LIMIT 1
+        `).bind(scholarshipId).first();
+        return scholarship ? json({ scholarship }, 200, cors) : json({ error: "Scholarship not found." }, 404, cors);
+      }
+
       if (url.pathname === "/api/scholarships" && request.method === "GET") {
         const limitParam = Number.parseInt(url.searchParams.get("limit") || "20", 10);
         const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 50) : 20;
