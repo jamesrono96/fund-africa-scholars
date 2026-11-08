@@ -259,6 +259,13 @@ export async function handleDiscovery(request, env, url) {
     const result=await scanSource(source,env.DB,admin.id);
     return json(result,result.status==="completed"?200:502);
   }
+  if(url.pathname==="/api/admin/discovery/summary" && request.method==="GET"){
+    const candidateRows=await env.DB.prepare("SELECT review_status,COUNT(*) AS total FROM scholarship_candidates GROUP BY review_status").all();
+    const reviewRows=await env.DB.prepare("SELECT decision,COUNT(*) AS total FROM candidate_field_reviews GROUP BY decision").all();
+    const runRows=await env.DB.prepare("SELECT status,COUNT(*) AS total FROM discovery_runs GROUP BY status").all();
+    const count=(rows,key)=>Object.fromEntries((rows||[]).map(row=>[row[key],Number(row.total)||0]));
+    return json({candidates:count(candidateRows.results,"review_status"),field_reviews:count(reviewRows.results,"decision"),runs:count(runRows.results,"status")});
+  }
   if(url.pathname==="/api/admin/discovery/runs" && request.method==="GET"){
     const rows=await env.DB.prepare("SELECT r.id,r.status,r.started_at,r.completed_at,r.candidates_found,r.error_summary,s.name AS source_name FROM discovery_runs r LEFT JOIN scholarship_sources s ON s.id=r.source_id ORDER BY r.created_at DESC LIMIT 100").all();
     return json({runs:rows.results||[]});
@@ -358,7 +365,7 @@ export async function handleDiscovery(request, env, url) {
     return json({reviews:rows.results||[]});
   }
   if(fieldReviewMatch && request.method==="POST"){
-    const candidate=await env.DB.prepare("SELECT id,official_url FROM scholarship_candidates WHERE id=?").bind(fieldReviewMatch[1]).first();
+    const candidate=await env.DB.prepare("SELECT id,official_url,extracted_data_json FROM scholarship_candidates WHERE id=?").bind(fieldReviewMatch[1]).first();
     if(!candidate)return json({error:"Candidate not found."},404);
     const parsed=await readBody(request);if(parsed.error)return json({error:parsed.error},400);
     const b=parsed.body;
