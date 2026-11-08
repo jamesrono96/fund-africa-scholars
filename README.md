@@ -40,6 +40,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - `db/migrations/0005_candidate_source_snapshots.sql` — official-page snapshot and change history
 - `db/migrations/0006_candidate_field_reviews.sql` — append-only administrator decisions on individual extracted fields
 - `db/migrations/0007_scholarship_verification_checklist.sql` — evidence-backed scholarship-level verification checklist
+- `db/migrations/0008_field_review_follow_up.sql` — preserves field-review history and adds needs-follow-up decisions
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
 - `.github/workflows/validate.yml` — GitHub Actions JavaScript syntax and SQLite migration checks
 - `wrangler.toml` — local/deployment configuration template (not deployed)
