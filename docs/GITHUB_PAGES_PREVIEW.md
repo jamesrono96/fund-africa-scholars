@@ -32,3 +32,20 @@ After setup, every push to `main` updates the preview automatically. The workflo
 ## Production remains separate
 
 This preview does not configure or deploy anything to Cloudflare. The Cloudflare Worker, D1 database, secrets, custom domain and production configuration remain separate and are not touched by this workflow.
+
+
+## Development D1 database setup (manual, one-time)
+
+The repository contains a manual GitHub Actions workflow named **Apply development D1 schema**. It applies the base schema and numbered migrations to the development database configured in `wrangler.toml`. It does not deploy a Worker or publish the production site.
+
+Before running it:
+
+1. In Cloudflare, create an API token with the minimum required permissions to manage D1 databases and execute queries for your account. Do not use a Global API Key.
+2. In the GitHub repository, open **Settings → Secrets and variables → Actions**.
+3. Add repository secrets named `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+4. Open **Actions → Apply development D1 schema → Run workflow**.
+5. Type `fund-africa-scholars-db` into the confirmation input and run it.
+
+This is a one-time initialization workflow, not a repeatable migration runner. Do not rerun it after it has succeeded: numbered migrations may not be safe to apply twice. If it fails partway through, inspect the D1 tables and the workflow logs before deciding how to resume. The admin setup template migration is intentionally skipped.
+
+Never put API tokens in source files, commits, chat messages or workflow inputs. Do not run this against a production database.
