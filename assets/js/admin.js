@@ -136,7 +136,7 @@ async function archiveRecord(id){
 }
 $("login-form").addEventListener("submit",async event=>{
  event.preventDefault();if(!API_BASE){msg("login-message","Admin sign-in is not active until the backend is configured.","error");return;}
- try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();}
+ try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();await loadDiscoverySummary();}
  catch(error){msg("login-message",error.message,"error");}
 });
 form.addEventListener("submit",async event=>{
@@ -161,8 +161,27 @@ async function loadSources(){
  try{const data=await api("/api/admin/discovery/sources");const body=$("sources");body.replaceChildren();for(const s of data.sources||[]){const tr=document.createElement("tr");for(const value of [s.name,s.official_domain,s.source_type,s.country,s.last_checked_at||"Never"])tr.append(cell(value));const action=cell("");const edit=document.createElement("button");edit.className="btn secondary";edit.type="button";edit.textContent="Edit";edit.addEventListener("click",()=>{sourceEditingId=s.id;$("source-domain").disabled=true;$("source-url").disabled=true;$("source-name").value=s.name;$("source-domain").value=s.official_domain;$("source-url").value=s.source_url;$("source-type").value=s.source_type;$("source-country").value=s.country||"";$("source-frequency").value=s.check_frequency_days;$("source-notes").value=s.notes||"";$("source-save").textContent="Save source changes";$("source-name").focus();});action.append(edit);const toggle=document.createElement("button");toggle.className="btn "+(s.is_active?"danger":"secondary");toggle.type="button";toggle.textContent=s.is_active?"Deactivate":"Reactivate";toggle.addEventListener("click",async()=>{if(!confirm((s.is_active?"Deactivate":"Reactivate")+" this source? "+(s.is_active?"It will no longer be scanned.":"It will become available for manual scans.")))return;toggle.disabled=true;try{await api("/api/admin/discovery/sources/"+s.id,{method:"PATCH",body:{is_active:!Boolean(s.is_active)}});msg("source-message","Source status updated.","success");await loadSources();}catch(error){msg("source-message",error.message,"error");toggle.disabled=false;}});action.append(toggle);if(s.is_active){const scan=document.createElement("button");scan.className="btn secondary";scan.type="button";scan.textContent="Check source";scan.addEventListener("click",()=>scanSource(s.id,scan));action.append(scan);}tr.append(action);body.append(tr);}msg("source-message",(data.sources||[]).length+" source(s) registered.","success");}
  catch(error){msg("source-message",error.message,"error");}
 }
-async function scanSource(id,button){if(!confirm("Fetch this registered official page now and look for scholarship-related links? Only same-domain links will enter the private review queue."))return;button.disabled=true;button.textContent="Checking…";try{const result=await api("/api/admin/discovery/sources/"+id+"/check",{method:"POST",body:{}});msg("source-message","Scan complete: "+result.candidates_found+" new candidate(s), "+result.duplicates+" duplicate(s). Nothing was published.","success");await loadCandidates();await loadRuns();}catch(error){msg("source-message",error.message,"error");}finally{button.disabled=false;button.textContent="Check source";}}
+async function scanSource(id,button){if(!confirm("Fetch this registered official page now and look for scholarship-related links? Only same-domain links will enter the private review queue."))return;button.disabled=true;button.textContent="Checking…";try{const result=await api("/api/admin/discovery/sources/"+id+"/check",{method:"POST",body:{}});msg("source-message","Scan complete: "+result.candidates_found+" new candidate(s), "+result.duplicates+" duplicate(s). Nothing was published.","success");await loadCandidates();await loadRuns();await loadDiscoverySummary();}catch(error){msg("source-message",error.message,"error");}finally{button.disabled=false;button.textContent="Check source";}}
 async function loadRuns(){if(!API_BASE)return;try{const data=await api("/api/admin/discovery/runs");const body=$("discovery-runs");if(!body)return;body.replaceChildren();for(const run of data.runs||[]){const tr=document.createElement("tr");for(const value of [run.source_name,run.status,run.started_at,run.candidates_found,run.error_summary])tr.append(cell(value));body.append(tr);}}catch(error){msg("candidate-message",error.message,"error");}}
+async function loadDiscoverySummary(){
+ if(!API_BASE){$("discovery-summary").textContent="Preview only: backend is not configured.";return;}
+ try{
+  const data=await api("/api/admin/discovery/summary");
+  const sections=[
+   ["Candidates",data.candidates||{},[["pending","Pending"],["needs_review","Needs review"],["accepted","Accepted"],["rejected","Rejected"],["duplicate","Duplicates"]]],
+   ["Field reviews",data.field_reviews||{},[["approved","Approved"],["rejected","Rejected"],["needs_follow_up","Needs follow-up"]]],
+   ["Discovery runs",data.runs||{},[["completed","Completed"],["failed","Failed"],["running","Running"]]]
+  ];
+  const host=$("discovery-summary");host.replaceChildren();
+  for(const [title,counts,items] of sections){
+   const card=document.createElement("div");card.style.background="#f7f8f2";card.style.border="1px solid #e3e9df";card.style.borderRadius="10px";card.style.padding="14px";
+   const heading=document.createElement("strong");heading.textContent=title;card.append(heading);
+   for(const [key,label] of items){const line=document.createElement("p");line.style.margin="5px 0";line.textContent=label+": "+(counts[key]||0);card.append(line);}
+   host.append(card);
+  }
+  msg("summary-message","Discovery metrics refreshed.","success");
+ }catch(error){msg("summary-message",error.message,"error");}
+}
 async function loadCandidates(){
  if(!API_BASE){msg("candidate-message","Preview only: backend is not configured.");return;}
  const status=$("candidate-filter").value;const query=status?"?status="+encodeURIComponent(status):"";
@@ -172,7 +191,7 @@ async function loadCandidates(){
 $("source-form").addEventListener("submit",async event=>{event.preventDefault();if(!API_BASE){msg("source-message","Registration is disabled until the backend is configured.","error");return;}const button=$("source-save");button.disabled=true;try{const editing=Boolean(sourceEditingId);const data=editing?{name:$("source-name").value,source_type:$("source-type").value,country:$("source-country").value,check_frequency_days:Number($("source-frequency").value),notes:$("source-notes").value}:{name:$("source-name").value,official_domain:$("source-domain").value,source_url:$("source-url").value,source_type:$("source-type").value,country:$("source-country").value,check_frequency_days:Number($("source-frequency").value),notes:$("source-notes").value};await api(editing?"/api/admin/discovery/sources/"+sourceEditingId:"/api/admin/discovery/sources",{method:editing?"PATCH":"POST",body:data});resetSourceForm();msg("source-message",editing?"Source settings updated.":"Official source registered. No scan was started.","success");await loadSources();}catch(error){msg("source-message",error.message,"error");}finally{button.disabled=false;}});
 $("source-refresh").addEventListener("click",loadSources);
 $("source-form").addEventListener("reset",()=>{if(sourceEditingId){sourceEditingId=null;$("source-save").textContent="Register source";}});
-$("candidate-refresh").addEventListener("click",loadCandidates);
+$("candidate-refresh").addEventListener("click",async()=>{await loadCandidates();await loadDiscoverySummary();});
 $("candidate-filter").addEventListener("change",loadCandidates);
 
 const originalLoadRecords=loadRecords;
