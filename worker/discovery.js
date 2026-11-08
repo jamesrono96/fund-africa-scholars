@@ -268,6 +268,27 @@ export async function handleDiscovery(request, env, url) {
     const rows = await env.DB.prepare("SELECT id,name,official_domain,source_url,source_type,country,check_frequency_days,notes,is_active,last_checked_at,created_at,updated_at FROM scholarship_sources ORDER BY name LIMIT 300").all();
     return json({ sources: rows.results || [] });
   }
+  const sourceMatch = url.pathname.match(/^\/api\/admin\/discovery\/sources\/([a-f0-9-]{36})$/i);
+  if (sourceMatch && request.method === "PATCH") {
+    const parsed = await readBody(request); if (parsed.error) return json({ error: parsed.error }, 400);
+    const b = parsed.body;
+    const allowed = new Set(["name","source_type","country","check_frequency_days","notes","is_active"]);
+    if (Object.keys(b).some(key => !allowed.has(key)) || !Object.keys(b).length) return json({ error: "Provide only supported source fields." }, 400);
+    const current = await env.DB.prepare("SELECT id FROM scholarship_sources WHERE id=?").bind(sourceMatch[1]).first();
+    if (!current) return json({ error: "Source not found." }, 404);
+    const sets = [], values = [];
+    if (Object.hasOwn(b,"name")) { const value=clean(b.name,160,true); if(!value)return json({error:"Source name is required."},400); sets.push("name=?"); values.push(value); }
+    if (Object.hasOwn(b,"source_type")) { if(!SOURCE_TYPES.has(b.source_type))return json({error:"Invalid source type."},400); sets.push("source_type=?"); values.push(b.source_type); }
+    if (Object.hasOwn(b,"country")) { sets.push("country=?"); values.push(clean(b.country,100)); }
+    if (Object.hasOwn(b,"check_frequency_days")) { const n=Number(b.check_frequency_days); if(!Number.isInteger(n)||n<1||n>180)return json({error:"Check frequency must be between 1 and 180 days."},400); sets.push("check_frequency_days=?"); values.push(n); }
+    if (Object.hasOwn(b,"notes")) { sets.push("notes=?"); values.push(clean(b.notes,1000)); }
+    if (Object.hasOwn(b,"is_active")) { if(typeof b.is_active!=="boolean")return json({error:"is_active must be true or false."},400); sets.push("is_active=?"); values.push(b.is_active?1:0); }
+    sets.push("updated_at=CURRENT_TIMESTAMP"); values.push(sourceMatch[1]);
+    await env.DB.prepare("UPDATE scholarship_sources SET "+sets.join(",")+" WHERE id=?").bind(...values).run();
+    await audit(env.DB,admin.id,"discovery.source_updated","scholarship_source",sourceMatch[1],{fields:Object.keys(b)});
+    return json({id:sourceMatch[1],message:"Source settings updated."});
+  }
+
   if (url.pathname === "/api/admin/discovery/sources" && request.method === "POST") {
     const parsed = await readBody(request); if (parsed.error) return json({ error: parsed.error }, 400);
     const b = parsed.body;
