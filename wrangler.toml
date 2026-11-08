@@ -3,14 +3,14 @@ name = "fund-africa-scholars-api"
 main = "worker/index.js"
 compatibility_date = "2026-11-07"
 
-# Create and bind a D1 database only when ready to configure a development environment.
+# Development D1 database. Binding is configured, but no Worker is deployed by this change.
 # Workers AI is optional. Uncomment only in a development environment after enabling it.
 # [ai]
 # binding = "AI"
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "fund-africa-scholars-dev"
-# database_id = "REPLACE_WITH_DATABASE_ID"
+[[d1_databases]]
+binding = "DB"
+database_name = "fund-africa-scholars-db"
+database_id = "508c3318-27e2-4985-8947-1a84218997a2"
 
 [vars]
 APP_ENV = "development"
