@@ -342,3 +342,63 @@ test("student recommendations require an authenticated session", async () => {
   const response = await worker.fetch(request("/api/student/recommendations"), { DB: new MockD1() });
   assert.equal(response.status, 401);
 });
+
+test("candidate field review rejects evidence not present in saved extraction", async () => {
+  class FieldReviewDB extends MockD1 {
+    prepare(sql) {
+      const statement={sql,values:[]};this.statements.push(statement);
+      const prepared={
+        bind:(...values)=>{statement.values=values;return prepared;},
+        first:async()=>{
+          if(sql.includes("FROM sessions JOIN users"))return {id:"admin-1",role:"admin"};
+          if(sql.includes("SELECT id,official_url FROM scholarship_candidates"))return {
+            id:"123e4567-e89b-12d3-a456-426614174000",
+            official_url:"https://university.example/scholarships",
+            extracted_data_json:JSON.stringify({structured_suggestions:{funding:[{value:"Full tuition",evidence:"Full tuition is covered."}]}})
+          };
+          return null;
+        },
+        all:async()=>({results:[]}),
+        run:async()=>({meta:{changes:1}})
+      };return prepared;
+    }
+  }
+  const db=new FieldReviewDB();
+  const response=await worker.fetch(request("/api/admin/discovery/candidates/123e4567-e89b-12d3-a456-426614174000/field-reviews",{
+    method:"POST",headers:{"content-type":"application/json",origin:"https://app.example.test",cookie:"fas_session=admin-token"},
+    body:JSON.stringify({field_key:"funding",suggested_value:"Full tuition",evidence_text:"Tuition is guaranteed.",source_url:"https://university.example/scholarships",decision:"approved"})
+  }),{DB:db,APP_ORIGIN:"https://app.example.test"});
+  assert.equal(response.status,409);
+  assert.equal(db.statements.some(x=>x.sql.includes("INSERT INTO candidate_field_reviews")),false);
+});
+
+test("candidate field review records needs-follow-up decisions for exact saved evidence", async () => {
+  class FieldReviewDB extends MockD1 {
+    prepare(sql) {
+      const statement={sql,values:[]};this.statements.push(statement);
+      const prepared={
+        bind:(...values)=>{statement.values=values;return prepared;},
+        first:async()=>{
+          if(sql.includes("FROM sessions JOIN users"))return {id:"admin-1",role:"admin"};
+          if(sql.includes("SELECT id,official_url FROM scholarship_candidates"))return {
+            id:"123e4567-e89b-12d3-a456-426614174000",
+            official_url:"https://university.example/scholarships",
+            extracted_data_json:JSON.stringify({structured_suggestions:{funding:[{value:"Full tuition",evidence:"Full tuition is covered."}]}})
+          };
+          return null;
+        },
+        all:async()=>({results:[]}),
+        run:async()=>({meta:{changes:1}})
+      };return prepared;
+    }
+  }
+  const db=new FieldReviewDB();
+  const response=await worker.fetch(request("/api/admin/discovery/candidates/123e4567-e89b-12d3-a456-426614174000/field-reviews",{
+    method:"POST",headers:{"content-type":"application/json",origin:"https://app.example.test",cookie:"fas_session=admin-token"},
+    body:JSON.stringify({field_key:"funding",suggested_value:"Full tuition",evidence_text:"Full tuition is covered.",source_url:"https://university.example/scholarships",decision:"needs_follow_up"})
+  }),{DB:db,APP_ORIGIN:"https://app.example.test"});
+  assert.equal(response.status,201);
+  assert.equal((await response.json()).decision,"needs_follow_up");
+  const insert=db.statements.find(x=>x.sql.includes("INSERT INTO candidate_field_reviews"));
+  assert.equal(insert.values[6],"needs_follow_up");
+});
