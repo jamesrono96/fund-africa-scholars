@@ -1,0 +1,63 @@
+name: Apply development D1 schema
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_database:
+        description: Type fund-africa-scholars-db to confirm the target development database
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  apply-schema:
+    if: ${{ inputs.confirm_database == 'fund-africa-scholars-db' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Wrangler
+        run: npm install --global wrangler
+
+      - name: Check required Cloudflare credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "Missing CLOUDFLARE_API_TOKEN repository secret" && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Missing CLOUDFLARE_ACCOUNT_ID repository secret" && exit 1)
+
+      - name: Apply base schema to development D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 execute fund-africa-scholars-db --remote --file=db/schema.sql
+
+      - name: Apply numbered development migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          for migration in db/migrations/*.sql; do
+            case "$migration" in
+              db/migrations/0003_admin_setup_template.sql) continue ;;
+            esac
+            echo "Applying $migration"
+            npx wrangler d1 execute fund-africa-scholars-db --remote --file="$migration"
+          done
+
+      - name: Verify expected D1 tables
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler d1 execute fund-africa-scholars-db --remote --command="SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
