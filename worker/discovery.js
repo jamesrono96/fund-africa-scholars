@@ -363,14 +363,19 @@ export async function handleDiscovery(request, env, url) {
     const parsed=await readBody(request);if(parsed.error)return json({error:parsed.error},400);
     const b=parsed.body;
     const field=clean(b.field_key,30,true),value=clean(b.suggested_value,500,true),evidence=clean(b.evidence_text,1200,true),decision=b.decision;
-    if(!["funding","study_levels","eligibility","deadlines"].includes(field)||!value||!evidence||!["approved","rejected"].includes(decision))return json({error:"Provide a valid field, suggestion, evidence excerpt and approve/reject decision."},400);
+    if(!["funding","study_levels","eligibility","deadlines"].includes(field)||!value||!evidence||!["approved","rejected","needs_follow_up"].includes(decision))return json({error:"Provide a valid field, suggestion, evidence excerpt and review decision."},400);
     const sourceUrl=clean(b.source_url,2048,true),parsedSource=sourceUrl&&httpsUrl(sourceUrl);
     if(!parsedSource||parsedSource.href!==candidate.official_url)return json({error:"Review evidence must reference this candidate's registered official URL."},400);
+    let extracted={};try{extracted=JSON.parse(candidate.extracted_data_json||"{}");}catch{}
+    const rule=extracted.structured_suggestions||{},ai=extracted.ai_review||{};
+    const suggestions=[...(rule[field]||[]),...(field==="deadlines"?(rule.deadline_phrases||[]):[]),...(ai[field]||[])];
+    const supported=suggestions.some(item=>item&&String(item.value||"").trim()===value&&String(item.evidence||"").trim()===evidence);
+    if(!supported)return json({error:"This value and evidence pair is not present in the saved extraction. Re-run extraction and review the exact suggestion."},409);
     const id=crypto.randomUUID();
     await env.DB.prepare("INSERT INTO candidate_field_reviews (id,candidate_id,field_key,suggested_value,evidence_text,source_url,decision,reviewer_id) VALUES (?,?,?,?,?,?,?,?)")
       .bind(id,candidate.id,field,value,evidence,parsedSource.href,decision,admin.id).run();
     await audit(env.DB,admin.id,"discovery.candidate_field_reviewed","scholarship_candidate",candidate.id,{field_key:field,decision,review_id:id});
-    return json({id,decision,message:"Field-level review recorded. This decision does not verify or publish the scholarship."},201);
+    return json({id,decision,message:"Field-level review recorded against a saved extraction and its evidence. This decision does not verify or publish the scholarship."},201);
   }
 
   const draftMatch = url.pathname.match(/^\/api\/admin\/discovery\/candidates\/([a-f0-9-]{36})\/create-draft$/i);
