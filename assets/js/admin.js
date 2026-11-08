@@ -50,13 +50,13 @@ async function renderFieldReviews(candidate,container){
   const value=document.createElement("p");value.textContent="Suggestion: "+item.value;card.append(value);
   const evidence=document.createElement("p");evidence.textContent="Evidence: “"+item.evidence+"”";card.append(evidence);
   const decision=document.createElement("span");decision.style.marginRight="8px";
-  for(const choice of ["approved","rejected"]){
-   const button=document.createElement("button");button.className="btn "+(choice==="rejected"?"danger":"secondary");button.type="button";button.textContent=choice==="approved"?"Approve evidence":"Reject suggestion";button.style.margin="3px";
+  for(const choice of ["approved","rejected","needs_follow_up"]){
+   const button=document.createElement("button");button.className="btn "+(choice==="rejected"?"danger":"secondary");button.type="button";button.textContent=choice==="approved"?"Approve evidence":choice==="rejected"?"Reject suggestion":"Needs follow-up";button.style.margin="3px";
    button.addEventListener("click",async()=>{
     button.disabled=true;
     try{
      const result=await api("/api/admin/discovery/candidates/"+candidate.id+"/field-reviews",{method:"POST",body:{field_key:item.field,suggested_value:item.value,evidence_text:item.evidence,source_url:candidate.official_url,decision:choice}});
-     decision.textContent="Recorded: "+choice+". "+result.message;msg("candidate-message",result.message,"success");
+     decision.textContent="Recorded: "+choice.replaceAll("_"," ")+". "+result.message;msg("candidate-message",result.message,"success");
     }catch(error){msg("candidate-message",error.message,"error");button.disabled=false;}
    });
    decision.append(button);
