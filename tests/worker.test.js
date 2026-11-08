@@ -402,3 +402,31 @@ test("candidate field review records needs-follow-up decisions for exact saved e
   const insert=db.statements.find(x=>x.sql.includes("INSERT INTO candidate_field_reviews"));
   assert.equal(insert.values[6],"needs_follow_up");
 });
+
+test("admin discovery summary reports candidate, field-review and run totals", async () => {
+  class SummaryDB extends MockD1 {
+    prepare(sql) {
+      const statement={sql,values:[]};this.statements.push(statement);
+      const prepared={
+        bind:(...values)=>{statement.values=values;return prepared;},
+        first:async()=>sql.includes("FROM sessions JOIN users")?{id:"admin-1",role:"admin"}:null,
+        all:async()=>{
+          if(sql.includes("GROUP BY review_status"))return {results:[{review_status:"pending",total:3},{review_status:"accepted",total:1}]};
+          if(sql.includes("GROUP BY decision"))return {results:[{decision:"approved",total:4},{decision:"needs_follow_up",total:2}]};
+          if(sql.includes("GROUP BY status"))return {results:[{status:"completed",total:5},{status:"failed",total:1}]};
+          return {results:[]};
+        },
+        run:async()=>({meta:{changes:1}})
+      };return prepared;
+    }
+  }
+  const response=await worker.fetch(request("/api/admin/discovery/summary",{
+    headers:{cookie:"fas_session=admin-token"}
+  }),{DB:new SummaryDB()});
+  assert.equal(response.status,200);
+  assert.deepEqual(await response.json(),{
+    candidates:{pending:3,accepted:1},
+    field_reviews:{approved:4,needs_follow_up:2},
+    runs:{completed:5,failed:1}
+  });
+});
