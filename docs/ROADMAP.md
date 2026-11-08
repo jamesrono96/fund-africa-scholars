@@ -87,7 +87,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [ ] AI-assisted structured extraction with source citations and calibrated confidence scoring
 - [x] Track candidate-page snapshots, last checked date and source changes (manual checks)
 - [x] Move changed candidates to human review and expose snapshot history
-- [x] Human approve/reject decisions for individual extracted fields, with evidence, source URL, reviewer and timestamp audit trail
+- [x] Human approve/reject/needs-follow-up decisions for individual extracted fields, validated against saved extraction evidence and recorded with source URL, reviewer and timestamp
 - [x] Seven-item scholarship-level evidence checklist in admin dashboard
 - [x] Server-side verification/publication gate requiring all checklist items confirmed or not applicable
 - [x] Return scholarship to needs-review/draft if a checklist item needs follow-up
