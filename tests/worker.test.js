@@ -63,6 +63,56 @@ test("discovery endpoints reject unauthenticated requests", async () => {
   assert.equal(response.status, 403);
 });
 
+test("admin can deactivate an official discovery source", async () => {
+  class SourceAdminDB extends MockD1 {
+    prepare(sql) {
+      const statement = { sql, values: [] }; this.statements.push(statement);
+      const prepared = {
+        bind: (...values) => { statement.values = values; return prepared; },
+        first: async () => {
+          if (sql.includes("FROM sessions JOIN users")) return { id: "admin-1", role: "admin" };
+          if (sql.includes("SELECT id FROM scholarship_sources")) return { id: "123e4567-e89b-12d3-a456-426614174000" };
+          return null;
+        },
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 1 } })
+      };
+      return prepared;
+    }
+  }
+  const db = new SourceAdminDB();
+  const response = await worker.fetch(request("/api/admin/discovery/sources/123e4567-e89b-12d3-a456-426614174000", {
+    method: "PATCH",
+    headers: { "content-type": "application/json", origin: "https://app.example.test", cookie: "fas_session=admin-token" },
+    body: JSON.stringify({ is_active: false })
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 200);
+  assert.match(db.statements.find(x => x.sql.startsWith("UPDATE scholarship_sources")).sql, /is_active=\?/);
+  assert.equal(db.statements.find(x => x.sql.startsWith("UPDATE scholarship_sources")).values[0], 0);
+});
+
+test("source updates reject unsupported fields and invalid check intervals", async () => {
+  class SourceAdminDB extends MockD1 {
+    prepare(sql) {
+      const prepared = {
+        bind: (...values) => { this.statements.push({sql,values}); return prepared; },
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "admin-1", role: "admin" } : { id: "source-1" },
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 1 } })
+      };
+      return prepared;
+    }
+  }
+  for (const body of [{ is_active: "false" }, { check_frequency_days: 0 }, { source_url: "https://attacker.example" }]) {
+    const response = await worker.fetch(request("/api/admin/discovery/sources/123e4567-e89b-12d3-a456-426614174000", {
+      method: "PATCH",
+      headers: { "content-type": "application/json", origin: "https://app.example.test", cookie: "fas_session=admin-token" },
+      body: JSON.stringify(body)
+    }), { DB: new SourceAdminDB(), APP_ORIGIN: "https://app.example.test" });
+    assert.equal(response.status, 400);
+  }
+});
+
 test("public scholarship queries are restricted to verified published records", async () => {
   const db = new MockD1();
   const response = await worker.fetch(request("/api/scholarships?limit=10"), { DB: db });
