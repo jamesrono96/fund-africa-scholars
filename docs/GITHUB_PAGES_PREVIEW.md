@@ -40,7 +40,7 @@ The repository contains a manual GitHub Actions workflow named **Apply developme
 
 Before running it:
 
-1. In Cloudflare, create an API token with the minimum required permissions to manage D1 databases and execute queries for your account. Do not use a Global API Key.
+1. In Cloudflare, create a custom API token with **Account → D1 → Edit** permission, scoped to the account that owns this database. This workflow only executes D1 SQL; it does not deploy Workers, so it does not need Workers Scripts permissions. Do not use a Global API Key.
 2. In the GitHub repository, open **Settings → Secrets and variables → Actions**.
 3. Add repository secrets named `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 4. Open **Actions → Apply development D1 schema → Run workflow**.
