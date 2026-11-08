@@ -351,7 +351,7 @@ test("candidate field review rejects evidence not present in saved extraction", 
         bind:(...values)=>{statement.values=values;return prepared;},
         first:async()=>{
           if(sql.includes("FROM sessions JOIN users"))return {id:"admin-1",role:"admin"};
-          if(sql.includes("SELECT id,official_url FROM scholarship_candidates"))return {
+          if(sql.includes("SELECT id,official_url,extracted_data_json FROM scholarship_candidates"))return {
             id:"123e4567-e89b-12d3-a456-426614174000",
             official_url:"https://university.example/scholarships",
             extracted_data_json:JSON.stringify({structured_suggestions:{funding:[{value:"Full tuition",evidence:"Full tuition is covered."}]}})
@@ -380,7 +380,7 @@ test("candidate field review records needs-follow-up decisions for exact saved e
         bind:(...values)=>{statement.values=values;return prepared;},
         first:async()=>{
           if(sql.includes("FROM sessions JOIN users"))return {id:"admin-1",role:"admin"};
-          if(sql.includes("SELECT id,official_url FROM scholarship_candidates"))return {
+          if(sql.includes("SELECT id,official_url,extracted_data_json FROM scholarship_candidates"))return {
             id:"123e4567-e89b-12d3-a456-426614174000",
             official_url:"https://university.example/scholarships",
             extracted_data_json:JSON.stringify({structured_suggestions:{funding:[{value:"Full tuition",evidence:"Full tuition is covered."}]}})
