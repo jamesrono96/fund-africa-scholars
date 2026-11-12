@@ -2,6 +2,7 @@
 name = "fund-africa-scholars-api"
 main = "worker/index.js"
 compatibility_date = "2026-11-07"
+account_id = "0e2afa0d6d68657f2157e92ea948aca2"
 
 # Development D1 database. Binding is configured, but no Worker is deployed by this change.
 # Workers AI is optional. Uncomment only in a development environment after enabling it.
