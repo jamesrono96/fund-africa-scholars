@@ -1,3 +1,4 @@
+import { readJsonLimited } from "./request.js";
 const SESSION_COOKIE = "fas_session";
 const LEVELS = new Set(["Undergraduate", "Masters", "PhD", "Postdoctoral", "Diploma", "Certificate"]);
 const FUNDING = new Set(["fully_funded", "partially_funded", "tuition_only", "stipend", "unspecified"]);
@@ -33,13 +34,7 @@ function originAllowed(request, env) {
   return Boolean(env.APP_ORIGIN && request.headers.get("Origin") === env.APP_ORIGIN);
 }
 async function bodyJson(request) {
-  if (!(request.headers.get("Content-Type") || "").toLowerCase().includes("application/json")) return { error: "Content-Type must be application/json." };
-  const length = Number(request.headers.get("Content-Length") || "0");
-  if (length > 8192) return { error: "Request body is too large." };
-  try {
-    const body = await request.json();
-    return body && typeof body === "object" && !Array.isArray(body) ? { body } : { error: "Invalid request body." };
-  } catch { return { error: "Invalid JSON body." }; }
+  return readJsonLimited(request, 8192);
 }
 function stringField(value, max, required = false) {
   if (typeof value !== "string") return required ? null : "";
