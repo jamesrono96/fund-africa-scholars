@@ -1,6 +1,13 @@
 name: Development website and API smoke check
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/development-smoke-check.yml'
+      - 'index.html'
+      - 'worker/**'
+      - 'wrangler.toml'
   workflow_dispatch:
   schedule:
     - cron: "23 6 * * *"
