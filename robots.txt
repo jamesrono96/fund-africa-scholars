@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /account.html
 
 Sitemap: https://jamesrono96.github.io/fund-africa-scholars/sitemap.xml
