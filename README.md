@@ -4,7 +4,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Development status
 
-**GitHub Pages preview configured; Cloudflare production is not deployed.** The static preview is intended for visual review only. The Cloudflare Worker API, D1 database, payment processing and live student accounts are not active. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
+**GitHub Pages preview and a Cloudflare development Worker/D1 backend are configured.** The account, directory, student dashboard and admin interfaces are wired to the development API. Payment processing and production deployment remain disabled; end-to-end browser testing is still pending. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
 
 ## Planned features
 
@@ -56,7 +56,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Local development
 
-The initial landing page can be previewed by opening `index.html` in a browser. The account interface and API endpoints are implemented as development foundations. The database migration still needs to be applied, and the API must be configured and tested in a development environment before accounts can work. The API and database are not live.
+The GitHub Pages preview uses the Cloudflare development Worker at `https://fund-africa-scholars-api.jamesrono96.workers.dev` and the configured D1 database. The schema and migrations have been applied and the Worker deployment workflow has succeeded. Browser-level end-to-end testing remains outstanding. Payment processing and production deployment are not enabled.
 
 See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence.
 
