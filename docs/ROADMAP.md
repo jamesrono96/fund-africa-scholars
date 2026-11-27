@@ -101,6 +101,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] GitHub Actions JavaScript syntax checks
 - [x] Automated SQLite schema/migration application and integrity check
 - [x] Worker API security smoke tests and SQLite migration validation in GitHub Actions
+- [x] Enforce streaming JSON request-size limits across authentication, student, scholarship-admin and discovery APIs, including requests without Content-Length
+- [x] Add regression test for oversized authentication request bodies
 - [ ] Browser end-to-end tests against the live development Worker/D1
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
 - [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
