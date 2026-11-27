@@ -136,7 +136,7 @@ async function archiveRecord(id){
 }
 $("login-form").addEventListener("submit",async event=>{
  event.preventDefault();if(!API_BASE){msg("login-message","Admin sign-in is not active until the backend is configured.","error");return;}
- try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();await loadDiscoverySummary();await loadDiscoverySummary();}
+ try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();await loadDiscoverySummary();}
  catch(error){msg("login-message",error.message,"error");}
 });
 form.addEventListener("submit",async event=>{
@@ -182,25 +182,7 @@ async function loadDiscoverySummary(){
   msg("summary-message","Discovery metrics refreshed.","success");
  }catch(error){msg("summary-message",error.message,"error");}
 }
-async function loadDiscoverySummary(){
- if(!API_BASE){$("discovery-summary").textContent="Preview only: backend is not configured.";return;}
- try{
-  const data=await api("/api/admin/discovery/summary");
-  const sections=[
-   ["Candidates",data.candidates||{},[["pending","Pending"],["needs_review","Needs review"],["accepted","Accepted"],["rejected","Rejected"],["duplicate","Duplicates"]]],
-   ["Field reviews",data.field_reviews||{},[["approved","Approved"],["rejected","Rejected"],["needs_follow_up","Needs follow-up"]]],
-   ["Discovery runs",data.runs||{},[["completed","Completed"],["failed","Failed"],["running","Running"]]]
-  ];
-  const host=$("discovery-summary");host.replaceChildren();
-  for(const [title,counts,items] of sections){
-   const card=document.createElement("div");card.style.background="#f7f8f2";card.style.border="1px solid #e3e9df";card.style.borderRadius="10px";card.style.padding="14px";
-   const heading=document.createElement("strong");heading.textContent=title;card.append(heading);
-   for(const [key,label] of items){const line=document.createElement("p");line.style.margin="5px 0";line.textContent=label+": "+(counts[key]||0);card.append(line);}
-   host.append(card);
-  }
-  msg("summary-message","Discovery metrics refreshed.","success");
- }catch(error){msg("summary-message",error.message,"error");}
-}
+
 async function loadCandidates(){
  if(!API_BASE){msg("candidate-message","Preview only: backend is not configured.");return;}
  const status=$("candidate-filter").value;const query=status?"?status="+encodeURIComponent(status):"";
