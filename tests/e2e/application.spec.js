@@ -157,3 +157,79 @@ test("student dashboard loads private workspace and saves profile preferences", 
     preferred_destinations: ["Canada"]
   });
 });
+
+test("student can add a saved scholarship to the tracker, update it, save notes and remove the saved item", async ({ page }) => {
+  const scholarship = {
+    id: "scholarship-2", title: "Somalia Future Leaders Award", provider: "Example Institute",
+    destination_country: "United Kingdom", application_deadline: "2027-05-15",
+    official_url: "https://institute.example/future-leaders"
+  };
+  let savedItems = [{ ...scholarship }];
+  let applications = [];
+  const changes = [];
+
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      user: { full_name: "Test Student", email: "student@example.test", country_of_residence: "Somalia" }
+    }) })
+  );
+  await page.route(`${API}/api/student/saved**`, async route => {
+    const request = route.request();
+    if (request.method() === "DELETE") {
+      savedItems = [];
+      changes.push({ method: "DELETE", url: request.url() });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ scholarships: savedItems }) });
+  });
+  await page.route(`${API}/api/student/applications**`, async route => {
+    const request = route.request();
+    if (request.method() === "POST") {
+      const body = request.postDataJSON();
+      expect(body).toMatchObject({ scholarship_id: "scholarship-2" });
+      applications = [{ id: "application-2", scholarship_id: "scholarship-2", status: "interested",
+        notes: "", ...scholarship }];
+      changes.push({ method: "POST", body });
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, id: "application-2" }) });
+      return;
+    }
+    if (request.method() === "PATCH") {
+      const body = request.postDataJSON();
+      changes.push({ method: "PATCH", body });
+      Object.assign(applications[0], body);
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ applications }) });
+  });
+  await page.route(`${API}/api/student/profile`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      profile: { full_name: "Test Student", email: "student@example.test",
+        country_of_residence: "Somalia", preferred_destinations: [] }
+    }) })
+  );
+
+  await page.goto("/dashboard.html");
+  await expect(page.locator("#saved-list")).toContainText("Somalia Future Leaders Award");
+  await page.getByRole("button", { name: "Add to tracker" }).click();
+  await expect(page.locator("#status")).toContainText("added to your application tracker");
+  expect(changes.some(change => change.method === "POST")).toBeTruthy();
+
+  await page.locator("#apps-tab").click();
+  await expect(page.locator("#apps-list")).toContainText("Somalia Future Leaders Award");
+  await page.getByLabel("Application status for Somalia Future Leaders Award").selectOption("submitted");
+  await expect(page.locator("#status")).toContainText("Application status updated");
+  await page.locator("#apps-list textarea").fill("Submitted the application and uploaded all documents.");
+  await page.getByRole("button", { name: "Save notes" }).click();
+  await expect(page.locator("#status")).toContainText("Your notes have been saved");
+  expect(changes).toEqual(expect.arrayContaining([
+    expect.objectContaining({ method: "PATCH", body: { status: "submitted" } }),
+    expect.objectContaining({ method: "PATCH", body: { notes: "Submitted the application and uploaded all documents." } })
+  ]));
+
+  await page.locator("#saved-tab").click();
+  await page.getByRole("button", { name: "Remove saved" }).click();
+  await expect(page.locator("#saved-list")).toContainText("You have not saved any scholarships yet");
+  expect(changes.some(change => change.method === "DELETE")).toBeTruthy();
+});
