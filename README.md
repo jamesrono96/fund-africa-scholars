@@ -68,7 +68,7 @@ The admin API includes a manual official-source registry and a candidate review 
 
 ### Manual source checks
 
-An administrator can trigger a check for a registered source. The Worker fetches the registered HTTPS page without following redirects, limits the HTML response size, and only queues matching scholarship-related links on that same official domain. These are link-title candidates, not verified scholarship facts. Every candidate stays private for human review; no scan publishes records. Scheduled scans and AI extraction are not implemented.
+An administrator can trigger a check for a registered source. The Worker fetches the registered HTTPS page without following redirects, limits the HTML response size, and only queues matching scholarship-related links on that same official domain. These are link-title candidates, not verified scholarship facts. Every candidate stays private for human review; no scan publishes records. Daily scheduled checks are configured for active registered sources. They queue candidates for human review only; they do not verify or publish records. AI extraction remains optional and requires a configured Workers AI binding.
 
 
 Accepted discovery candidates can be converted by an administrator into unpublished scholarship drafts. Drafts start with pending verification and a prominent eligibility placeholder; conversion does not verify or publish them.
