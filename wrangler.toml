@@ -15,3 +15,7 @@ APP_ENV = "development"
 APP_ORIGIN = "https://jamesrono96.github.io"
 
 # No payment provider credentials or production settings belong in this file.
+
+[triggers]
+# Daily source checks run only for active sources registered by an administrator.
+crons = ["0 6 * * *"]
