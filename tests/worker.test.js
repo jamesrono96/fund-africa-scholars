@@ -67,6 +67,35 @@ test("registration enforces the streaming JSON body limit even without Content-L
   assert.equal(db.statements.length, 0);
 });
 
+test("logout rejects requests from an untrusted origin without revoking a session", async () => {
+  const db = new MockD1();
+  const response = await worker.fetch(request("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      origin: "https://attacker.example",
+      cookie: "fas_session=valid-test-session"
+    }
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 403);
+  assert.equal(db.statements.length, 0);
+});
+
+test("logout revokes the current session for the configured application origin", async () => {
+  const db = new MockD1();
+  const response = await worker.fetch(request("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      origin: "https://app.example.test",
+      cookie: "fas_session=valid-test-session"
+    }
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+  assert.ok(db.statements.some(item => item.sql.includes("DELETE FROM sessions WHERE token_hash = ?")));
+  assert.match(response.headers.get("set-cookie"), /HttpOnly/);
+  assert.match(response.headers.get("set-cookie"), /Max-Age=0/);
+});
+
 test("student endpoints require an authenticated session", async () => {
   const response = await worker.fetch(request("/api/student/saved"), { DB: new MockD1() });
   assert.equal(response.status, 401);
