@@ -1,6 +1,6 @@
 # GitHub Pages preview
 
-This repository can publish a **static preview** of Fund Africa Scholars through GitHub Pages. It is intended for visual review before the production Cloudflare deployment.
+This repository can publish a **static preview** of Fund Africa Scholars through GitHub Pages. It is a static frontend preview connected to the separate development Cloudflare Worker and D1 backend. It is not the production service.
 
 ## Preview URL
 
@@ -14,7 +14,7 @@ The preview workflow stages only the HTML pages and browser-side JavaScript need
 
 ## Important limitations
 
-GitHub Pages is static hosting. It does not run the Cloudflare Worker API or D1 database. Therefore, account registration and sign-in, saved scholarships, recommendations, application tracking, admin operations, discovery scans, and AI extraction will not work in this preview. No payment processing is enabled.
+GitHub Pages is static hosting and does not itself run the API. The account, saved-scholarship, application-tracking and admin features call the separately deployed development Worker and D1 database. Their availability depends on that backend being healthy and correctly configured. AI extraction additionally requires a Workers AI binding. This preview is for development only and should not collect real student data. No payment processing is enabled.
 
 The preview is not the production service and must not be used to collect real student data or passwords. Scholarship listings remain empty until opportunities have been verified and published through the real backend.
 
@@ -31,7 +31,7 @@ After setup, every push to `main` updates the preview automatically. The workflo
 
 ## Production remains separate
 
-This preview does not configure or deploy anything to Cloudflare. The Cloudflare Worker, D1 database, secrets, custom domain and production configuration remain separate and are not touched by this workflow.
+The Pages workflow publishes only the static frontend. A separate GitHub Actions workflow deploys the development Worker. Production hosting, custom domain, payment credentials and production data remain separate and are not enabled.
 
 
 ## Development D1 database setup (manual, one-time)
