@@ -1,3 +1,4 @@
+import { readJsonLimited } from "./request.js";
 const HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
@@ -38,17 +39,7 @@ function allowedOrigin(request, env) {
   return Boolean(env.APP_ORIGIN && request.headers.get("Origin") === env.APP_ORIGIN);
 }
 async function readBody(request) {
-  const type = request.headers.get("Content-Type") || "";
-  if (!type.toLowerCase().includes("application/json")) return { error: "Content-Type must be application/json." };
-  const length = Number(request.headers.get("Content-Length") || "0");
-  if (length > 4096) return { error: "Request body is too large." };
-  try {
-    const body = await request.json();
-    return body && typeof body === "object" && !Array.isArray(body)
-      ? { body } : { error: "Invalid request body." };
-  } catch {
-    return { error: "Invalid JSON body." };
-  }
+  return readJsonLimited(request, 4096);
 }
 function visibleScholarshipClause() {
   return "s.publication_status = 'published' AND s.verification_status = 'verified'";
