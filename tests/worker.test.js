@@ -49,6 +49,24 @@ test("registration rejects an untrusted origin before database access", async ()
   assert.equal(db.statements.length, 0);
 });
 
+test("registration enforces the streaming JSON body limit even without Content-Length", async () => {
+  const db = new MockD1();
+  const oversized = JSON.stringify({
+    email: "student@example.com",
+    password: "long-secure-password",
+    full_name: "Student Name",
+    extra: "x".repeat(9000)
+  });
+  const response = await worker.fetch(request("/api/auth/register", {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: "https://app.example.test" },
+    body: oversized
+  }), { DB: db, APP_ORIGIN: "https://app.example.test" });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /too large/);
+  assert.equal(db.statements.length, 0);
+});
+
 test("student endpoints require an authenticated session", async () => {
   const response = await worker.fetch(request("/api/student/saved"), { DB: new MockD1() });
   assert.equal(response.status, 401);
