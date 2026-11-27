@@ -1,7 +1,7 @@
 /* Public verified scholarship directory. */
 (() => {
 "use strict";
-const API_BASE=window.FAS_API_BASE||"";
+const API_BASE=window.FAS_API_BASE||"https://fund-africa-scholars-api.jamesrono96.workers.dev";
 const $=id=>document.getElementById(id);
 $("year").textContent=new Date().getFullYear();
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
