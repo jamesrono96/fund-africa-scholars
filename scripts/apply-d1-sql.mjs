@@ -114,6 +114,7 @@ for (let index = 0; index < statements.length; index += 1) {
       .join("; ") || `HTTP ${response.status}`;
     throw new Error(`D1 API rejected statement ${index + 1}/${statements.length}: ${details}`);
   }
+  if (/^SELECT\\b/i.test(sql)) console.log("Query result:", JSON.stringify(payload.result));
 }
 
 console.log(`Successfully applied ${statements.length} SQL statements to ${database}.`);
