@@ -142,9 +142,9 @@ test("student dashboard loads private workspace and saves profile preferences", 
   await page.goto("/dashboard.html");
   await expect(page.locator("#welcome")).toContainText("Test Student");
   await expect(page.locator("#saved-list")).toContainText("Test Global Scholarship");
-  await page.getByRole("tab", { name: "Application tracker" }).click();
+  await page.locator("#apps-tab").click();
   await expect(page.locator("#apps-list")).toContainText("Draft my statement");
-  await page.getByRole("tab", { name: "My profile" }).click();
+  await page.locator("#profile-tab").click();
   await expect(page.locator("#profile-email")).toHaveValue("student@example.test");
   await page.locator("#profile-name").fill("Test Student Updated");
   await page.locator("#profile-country").fill("Somalia");
