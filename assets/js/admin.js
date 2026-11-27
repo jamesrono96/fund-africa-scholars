@@ -1,7 +1,7 @@
 /* Admin dashboard. API remains inactive until a development backend is configured. */
 (() => {
 "use strict";
-const API_BASE=window.FAS_API_BASE||"";
+const API_BASE=window.FAS_API_BASE||"https://fund-africa-scholars-api.jamesrono96.workers.dev";
 const $=id=>document.getElementById(id);
 const loginPanel=$("login-panel"),adminPanel=$("admin-panel"),form=$("scholarship-form");
 let records=[];
