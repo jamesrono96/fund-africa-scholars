@@ -103,7 +103,10 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Worker API security smoke tests and SQLite migration validation in GitHub Actions
 - [x] Enforce streaming JSON request-size limits across authentication, student, scholarship-admin and discovery APIs, including requests without Content-Length
 - [x] Add regression test for oversized authentication request bodies
+- [x] Add regression tests confirming logout rejects untrusted origins and revokes the current session for the configured origin
+- [x] Document a controlled browser test plan, safe test-data rules and release blockers
 - [ ] Browser end-to-end tests against the live development Worker/D1
+- [x] Publish a manual browser smoke-test guide for public, student and admin flows
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
 - [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
 - [ ] Security review and dependency review
