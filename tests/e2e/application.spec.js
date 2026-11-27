@@ -20,7 +20,7 @@ test("account page switches tabs and signs in with a mocked API", async ({ page 
   await expect(page.getByRole("heading", { name: "Your scholarship journey starts here." })).toBeVisible();
   await page.getByRole("tab", { name: "Create account" }).click();
   await expect(page.locator("#register-form")).toBeVisible();
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.locator("#login-tab").click();
   await page.locator("#login-email").fill("student@example.test");
   await page.locator("#login-password").fill("CorrectHorseBatteryStaple!");
   await page.locator("#login-form button[type=submit]").click();
@@ -140,7 +140,7 @@ test("student dashboard loads private workspace and saves profile preferences", 
   });
 
   await page.goto("/dashboard.html");
-  await expect(page.locator("#welcome")).toContainText("Test Student");
+  await expect(page.locator("#welcome")).toHaveText("Welcome, Test");
   await expect(page.locator("#saved-list")).toContainText("Test Global Scholarship");
   await page.locator("#apps-tab").click();
   await expect(page.locator("#apps-list")).toContainText("Draft my statement");
