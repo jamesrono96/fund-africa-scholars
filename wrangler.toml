@@ -1,12 +1,10 @@
-# Configuration template only. This project is not deployed.
+# Development Worker configuration. Production deployment remains disabled.
 name = "fund-africa-scholars-api"
 main = "worker/index.js"
 compatibility_date = "2026-11-07"
-# Account ID is supplied securely by CLOUDFLARE_ACCOUNT_ID in GitHub Actions.
-# Development D1 database. Binding is configured, but no Worker is deployed by this change.
-# Workers AI is optional. Uncomment only in a development environment after enabling it.
-# [ai]
-# binding = "AI"
+workers_dev = true
+preview_urls = false
+
 [[d1_databases]]
 binding = "DB"
 database_name = "fund-africa-scholars-db"
@@ -14,6 +12,6 @@ database_id = "508c3318-27e2-4985-8947-1a84219897a2"
 
 [vars]
 APP_ENV = "development"
+APP_ORIGIN = "https://jamesrono96.github.io"
 
-# Set APP_ORIGIN and provider credentials as encrypted environment secrets
-# in the deployment environment later. Never commit secrets here.
+# No payment provider credentials or production settings belong in this file.
