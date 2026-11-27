@@ -52,7 +52,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - Payment access must be granted only after server-side verification from the payment provider.
 - Scholarship records must include an official source URL and a checked date. Unverified records must not be presented as verified.
 - Admin actions and payment state changes must be validated on the server.
-- Do not deploy this repository until the owner explicitly approves it.
+- Do not deploy a production version or connect production data until the owner explicitly approves it.
 
 ## Local development
 
@@ -63,7 +63,7 @@ See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence.
 
 ## Scholarship discovery foundation
 
-The admin API includes a manual official-source registry and a candidate review queue. Apply `db/migrations/0004_scholarship_discovery.sql` and `db/migrations/0005_candidate_source_snapshots.sql` after the earlier migrations before using these endpoints. Discovery candidates are never published automatically; an administrator must verify and separately create/publish a scholarship. Automated crawling, AI extraction, scheduled checks and notifications are not implemented yet.
+The admin API includes a manual official-source registry and a candidate review queue. Apply `db/migrations/0004_scholarship_discovery.sql` and `db/migrations/0005_candidate_source_snapshots.sql` after the earlier migrations before using these endpoints. Discovery candidates are never published automatically; an administrator must verify and separately create/publish a scholarship. Daily scheduled checks are configured for active registered sources. They queue candidates for human review only and never verify or publish records automatically. AI extraction remains optional and requires a configured Workers AI binding. Email notifications are not implemented yet.
 
 
 ### Manual source checks
