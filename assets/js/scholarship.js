@@ -1,7 +1,7 @@
 /* Public verified scholarship detail view and optional signed-in student actions. */
 (() => {
 "use strict";
-const API_BASE=window.FAS_API_BASE||"";
+const API_BASE=window.FAS_API_BASE||"https://fund-africa-scholars-api.jamesrono96.workers.dev";
 const $=id=>document.getElementById(id);
 const id=new URLSearchParams(location.search).get("id");
 function say(text,error=false){$("status").textContent=text;$("status").className="status"+(error?" error":"");}
