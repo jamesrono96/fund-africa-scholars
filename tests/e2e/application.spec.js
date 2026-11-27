@@ -143,7 +143,7 @@ test("student dashboard loads private workspace and saves profile preferences", 
   await expect(page.locator("#welcome")).toHaveText("Welcome, Test");
   await expect(page.locator("#saved-list")).toContainText("Test Global Scholarship");
   await page.locator("#apps-tab").click();
-  await expect(page.locator("#apps-list")).toContainText("Draft my statement");
+  await expect(page.locator("#apps-list textarea")).toHaveValue("Draft my statement");
   await page.locator("#profile-tab").click();
   await expect(page.locator("#profile-email")).toHaveValue("student@example.test");
   await page.locator("#profile-name").fill("Test Student Updated");
