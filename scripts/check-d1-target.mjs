@@ -3,7 +3,7 @@ import process from "node:process";
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const token = process.env.CLOUDFLARE_API_TOKEN;
 const expectedName = "fund-africa-scholars-db";
-const expectedId = "508c3318-27e2-4985-8947-1a84218997a2";
+const expectedId = "508c3318-27e2-4985-8947-1a84219897a2";
 
 if (!accountId || !token) throw new Error("Missing Cloudflare credentials.");
 console.log("Checking Cloudflare account and D1 database identity.");
