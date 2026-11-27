@@ -343,6 +343,9 @@ export default {
       if (url.pathname === "/api/scholarships" && request.method === "GET") {
         const limitParam = Number.parseInt(url.searchParams.get("limit") || "20", 10);
         const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 50) : 20;
+        const offsetParam = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+        if (!Number.isInteger(offsetParam) || offsetParam < 0 || offsetParam > 100000) return json({ error: "Invalid pagination offset." }, 400, cors);
+        const offset = offsetParam;
         const filters = {
           country: url.searchParams.get("country"), level: url.searchParams.get("level"),
           keyword: url.searchParams.get("q"), subject: url.searchParams.get("subject"),
@@ -386,10 +389,13 @@ export default {
         if (filters.deadline === "closing_30") query += " AND application_deadline BETWEEN date('now') AND date('now', '+30 days')";
         if (filters.deadline === "expired") query += " AND application_deadline < date('now')";
         if (filters.deadline === "not_listed") query += " AND application_deadline IS NULL";
-        query += " ORDER BY application_deadline IS NULL, application_deadline ASC LIMIT ?";
-        bindings.push(limit);
+        query += " ORDER BY application_deadline IS NULL, application_deadline ASC LIMIT ? OFFSET ?";
+        bindings.push(limit + 1, offset);
         const result = await env.DB.prepare(query).bind(...bindings).all();
-        return json({ scholarships: result.results || [], count: (result.results || []).length, limit }, 200, cors);
+        const rows = result.results || [];
+        const hasMore = rows.length > limit;
+        const scholarships = hasMore ? rows.slice(0, limit) : rows;
+        return json({ scholarships, count: scholarships.length, limit, offset, has_more: hasMore }, 200, cors);
       }
       return json({ error: "Not found." }, 404, cors);
     } catch {
