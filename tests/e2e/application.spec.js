@@ -98,3 +98,62 @@ test("student can register and sign out in the account interface", async ({ page
   await expect(page.locator("#auth-panel")).toBeVisible();
   await expect(page.locator("#auth-message")).toContainText("You have signed out");
 });
+
+test("student dashboard loads private workspace and saves profile preferences", async ({ page }) => {
+  const saved = [{
+    id: "scholarship-1", title: "Test Global Scholarship", provider: "Example University",
+    destination_country: "Canada", application_deadline: "2027-03-01",
+    official_url: "https://university.example/scholarship"
+  }];
+  const applications = [{
+    id: "application-1", scholarship_id: "scholarship-1", status: "preparing", notes: "Draft my statement",
+    title: "Test Global Scholarship", provider: "Example University", destination_country: "Canada",
+    application_deadline: "2027-03-01", official_url: "https://university.example/scholarship"
+  }];
+  let savedProfile = null;
+
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      user: { full_name: "Test Student", email: "student@example.test", country_of_residence: "Somalia" }
+    }) })
+  );
+  await page.route(`${API}/api/student/saved`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ scholarships: saved }) })
+  );
+  await page.route(`${API}/api/student/applications`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ applications }) })
+  );
+  await page.route(`${API}/api/student/profile`, async route => {
+    if (route.request().method() === "PATCH") {
+      savedProfile = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        profile: { full_name: savedProfile.full_name, email: "student@example.test",
+          country_of_residence: savedProfile.country_of_residence,
+          preferred_destinations: savedProfile.preferred_destinations }
+      }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      profile: { full_name: "Test Student", email: "student@example.test",
+        country_of_residence: "Somalia", preferred_destinations: ["Canada"] }
+    }) });
+  });
+
+  await page.goto("/dashboard.html");
+  await expect(page.locator("#welcome")).toContainText("Test Student");
+  await expect(page.locator("#saved-list")).toContainText("Test Global Scholarship");
+  await page.getByRole("tab", { name: "Application tracker" }).click();
+  await expect(page.locator("#apps-list")).toContainText("Draft my statement");
+  await page.getByRole("tab", { name: "My profile" }).click();
+  await expect(page.locator("#profile-email")).toHaveValue("student@example.test");
+  await page.locator("#profile-name").fill("Test Student Updated");
+  await page.locator("#profile-country").fill("Somalia");
+  await page.locator("#destination-options input[value="Canada"]").check();
+  await page.getByRole("button", { name: "Save profile" }).click();
+  await expect(page.locator("#status")).toContainText("profile and study preferences have been saved");
+  expect(savedProfile).toMatchObject({
+    full_name: "Test Student Updated",
+    country_of_residence: "Somalia",
+    preferred_destinations: ["Canada"]
+  });
+});
