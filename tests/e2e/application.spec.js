@@ -233,3 +233,72 @@ test("student can add a saved scholarship to the tracker, update it, save notes 
   await expect(page.locator("#saved-list")).toContainText("You have not saved any scholarships yet");
   expect(changes.some(change => change.method === "DELETE")).toBeTruthy();
 });
+
+test("admin interface denies a signed-in student account", async ({ page }) => {
+  await page.route(`${API}/api/auth/login`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { email: "student@example.test" } }) })
+  );
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      user: { id: "student-1", email: "student@example.test", role: "student" }
+    }) })
+  );
+  await page.goto("/admin.html");
+  await page.locator("#email").fill("student@example.test");
+  await page.locator("#password").fill("Test-Only-Password-123");
+  await page.locator("#login-form button[type=submit]").click();
+  await expect(page.locator("#login-message")).toContainText("does not have administrator permissions");
+  await expect(page.locator("#admin-panel")).toBeHidden();
+  await expect(page.locator("#login-panel")).toBeVisible();
+});
+
+test("admin dashboard loads mocked records and discovery metrics without publishing", async ({ page }) => {
+  const calls = [];
+  await page.route(`${API}/api/auth/login`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) })
+  );
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      user: { id: "admin-1", email: "admin@example.test", role: "admin" }
+    }) })
+  );
+  await page.route(`${API}/api/admin/**`, async route => {
+    const url = new URL(route.request().url());
+    calls.push({ path: url.pathname, method: route.request().method() });
+    const responses = {
+      "/api/admin/scholarships": { scholarships: [] },
+      "/api/admin/discovery/sources": { sources: [] },
+      "/api/admin/discovery/candidates": { candidates: [] },
+      "/api/admin/discovery/runs": { runs: [] },
+      "/api/admin/discovery/summary": {
+        candidates: { pending: 2, needs_review: 1, accepted: 0, rejected: 0, duplicate: 0 },
+        field_reviews: { approved: 3, rejected: 0, needs_follow_up: 1 },
+        runs: { completed: 4, failed: 0, running: 0 }
+      }
+    };
+    await route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify(responses[url.pathname] || {})
+    });
+  });
+
+  await page.goto("/admin.html");
+  await page.locator("#email").fill("admin@example.test");
+  await page.locator("#password").fill("Test-Only-Admin-Password-123");
+  await page.locator("#login-form button[type=submit]").click();
+  await expect(page.locator("#admin-panel")).toBeVisible();
+  await expect(page.locator("#login-panel")).toBeHidden();
+  await expect(page.locator("#list-message")).toContainText("0 record(s) loaded");
+  await expect(page.locator("#source-message")).toContainText("0 source(s) registered");
+  await expect(page.locator("#candidate-message")).toContainText("0 candidate(s) loaded");
+  await expect(page.locator("#summary-message")).toContainText("Discovery metrics refreshed");
+  await expect(page.locator("#discovery-summary")).toContainText("Pending: 2");
+  await expect(page.locator("#discovery-summary")).toContainText("Approved: 3");
+  expect(calls.some(call => call.path === "/api/admin/scholarships" && call.method === "GET")).toBeTruthy();
+  expect(calls.some(call => call.path === "/api/admin/discovery/summary" && call.method === "GET")).toBeTruthy();
+  expect(calls.some(call => call.method === "POST" || call.method === "PATCH" || call.method === "DELETE")).toBeFalsy();
+
+  await page.locator("#logout-button").click();
+  await expect(page.locator("#login-panel")).toBeVisible();
+  await expect(page.locator("#password")).toHaveValue("");
+});
