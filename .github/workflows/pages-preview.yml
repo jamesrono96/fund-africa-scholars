@@ -24,7 +24,7 @@ jobs:
       - name: Prepare static preview
         run: |
           mkdir -p site/assets/js
-          cp index.html directory.html scholarship.html account.html dashboard.html admin.html site/
+          cp index.html directory.html scholarship.html account.html dashboard.html admin.html 404.html robots.txt sitemap.xml site/
           cp assets/js/*.js site/assets/js/
           touch site/.nojekyll
 
