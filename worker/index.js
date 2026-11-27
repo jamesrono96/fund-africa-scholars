@@ -1,3 +1,4 @@
+import { readJsonLimited } from "./request.js";
 import { handleAdmin } from "./admin.js";
 import { handleStudent } from "./student.js";
 import { handleDiscovery, runScheduledDiscovery } from "./discovery.js";
@@ -107,17 +108,7 @@ async function verifyPassword(password, encoded) {
 }
 
 async function readJson(request) {
-  const type = request.headers.get("Content-Type") || "";
-  if (!type.toLowerCase().includes("application/json")) return { error: "Content-Type must be application/json." };
-  const length = Number(request.headers.get("Content-Length") || "0");
-  if (length > 8192) return { error: "Request body is too large." };
-  try {
-    const body = await request.json();
-    if (!body || typeof body !== "object" || Array.isArray(body)) return { error: "Invalid request body." };
-    return { body };
-  } catch {
-    return { error: "Invalid JSON body." };
-  }
+  return readJsonLimited(request, 8192);
 }
 
 async function createSession(db, userId) {
