@@ -3,7 +3,7 @@ import process from "node:process";
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const token = process.env.CLOUDFLARE_API_TOKEN;
-const databaseId = process.env.D1_DATABASE_ID || "508c3318-27e2-4985-8947-1a84218997a2";
+const databaseId = process.env.D1_DATABASE_ID || "508c3318-27e2-4985-8947-1a84219897a2";
 const database = process.env.D1_DATABASE_NAME || "fund-africa-scholars-db";
 const file = process.argv[2];
 
