@@ -1,6 +1,6 @@
 import { handleAdmin } from "./admin.js";
 import { handleStudent } from "./student.js";
-import { handleDiscovery } from "./discovery.js";
+import { handleDiscovery, runScheduledDiscovery } from "./discovery.js";
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -272,6 +272,9 @@ async function authLogout(request, env) {
 }
 
 export default {
+  async scheduled(_controller, env, context) {
+    context.waitUntil(runScheduledDiscovery(env, 5));
+  },
   async fetch(request, env) {
     const url = new URL(request.url);
     const cors = corsHeaders(request, env);
