@@ -1,3 +1,4 @@
+import { readJsonLimited } from "./request.js";
 const SESSION_COOKIE = "fas_session";
 const SOURCE_TYPES = new Set(["university", "government", "foundation", "embassy", "official_portal", "other"]);
 const REVIEW = new Set(["pending", "needs_review", "accepted", "rejected", "duplicate"]);
@@ -32,13 +33,7 @@ function originAllowed(request, env) {
   return Boolean(env.APP_ORIGIN && request.headers.get("Origin") === env.APP_ORIGIN);
 }
 async function readBody(request) {
-  if (!(request.headers.get("Content-Type") || "").toLowerCase().includes("application/json")) return { error: "Content-Type must be application/json." };
-  const length = Number(request.headers.get("Content-Length") || "0");
-  if (length > 12000) return { error: "Request body is too large." };
-  try {
-    const body = await request.json();
-    return body && typeof body === "object" && !Array.isArray(body) ? { body } : { error: "Invalid JSON body." };
-  } catch { return { error: "Invalid JSON body." }; }
+  return readJsonLimited(request, 12000);
 }
 function clean(value, max, required = false) {
   if (typeof value !== "string") return required ? null : "";
