@@ -72,3 +72,29 @@ test("scholarship detail layout fits a narrow mobile viewport without horizontal
   await expect(page.locator("#save-button")).toBeVisible();
   await expect(page.locator("#track-button")).toBeVisible();
 });
+
+test("scholarship detail hides a non-HTTPS provider link", async ({ page }) => {
+  const unsafe = structuredClone(verifiedScholarship);
+  unsafe.scholarship.official_url = "javascript:alert(1)";
+  await page.route(`${API}/api/scholarships/verified-test-1`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(unsafe) })
+  );
+
+  await page.goto("/scholarship.html?id=verified-test-1");
+  await expect(page.getByRole("heading", { name: "African Excellence Graduate Scholarship" })).toBeVisible();
+  await expect(page.locator("#official-link")).toBeHidden();
+});
+
+test("scholarship detail explains when the scholarship API is unavailable", async ({ page }) => {
+  await page.route(`${API}/api/scholarships/verified-test-1`, route =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Scholarship service temporarily unavailable." })
+    })
+  );
+
+  await page.goto("/scholarship.html?id=verified-test-1");
+  await expect(page.getByRole("heading", { name: "Scholarship unavailable" })).toBeVisible();
+  await expect(page.locator("#status")).toContainText("temporarily unavailable");
+});
