@@ -24,8 +24,14 @@ jobs:
           for file in worker/*.js assets/js/*.js; do
             node --check "$file"
           done
+      - name: Install browser test dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
       - name: Run Worker API security smoke tests
         run: npm test
+      - name: Run browser end-to-end tests
+        run: npm run test:e2e
       - name: Validate SQLite schema and migrations
         run: |
           python3 - <<'PY'
