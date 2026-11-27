@@ -36,7 +36,11 @@
       body: options.body ? JSON.stringify(options.body) : undefined
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Request failed. Please try again.");
+    if (!response.ok) {
+      const error = new Error(data.error || "Request failed. Please try again.");
+      error.status = response.status;
+      throw error;
+    }
     return data;
   }
 
@@ -56,8 +60,11 @@
     try {
       const data = await api("/api/auth/me");
       showDashboard(data.user);
-    } catch {
-      // Not signed in, or API is not yet available. Keep the sign-in screen visible.
+    } catch (error) {
+      // A normal unauthenticated response means the visitor should sign in.
+      // Surface connectivity/server failures instead of silently hiding them.
+      if (error.status === 401 || error.status === 403) return;
+      setMessage(message, "We could not reach the account service. Check your connection and try again.", "error");
     }
   }
 
@@ -72,6 +79,8 @@
         method: "POST",
         body: { email: $("login-email").value.trim(), password: $("login-password").value }
       });
+      loginForm.reset();
+      registerForm.reset();
       showDashboard(data.user);
     } catch (error) {
       setMessage(message, error.message, "error");
