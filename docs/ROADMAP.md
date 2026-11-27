@@ -32,7 +32,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Logout and current-session endpoint
 - [x] Basic login/registration rate-limit foundation
 - [x] Apply base schema and numbered migrations to development D1; GitHub Actions verified expected tables
-- [ ] Email verification and password reset
+- [ ] Select and configure an email delivery provider; implement email verification and password reset
 - [ ] Validate cross-site cookie behavior and complete CSRF/production security review
 - [x] Student profile and study-destination preferences API and dashboard interface
 - [x] Private recommendations for verified scholarships matching preferred destinations
@@ -102,6 +102,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Automated SQLite schema/migration application and integrity check
 - [x] Worker API security smoke tests and SQLite migration validation in GitHub Actions
 - [ ] Browser end-to-end tests against the live development Worker/D1
+- [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
+- [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
 - [ ] Security review and dependency review
 - [ ] Accessibility and mobile checks
 - [ ] Backup and recovery plan
@@ -113,6 +115,7 @@ The repository remains the development workspace. The development Worker and D1 
 
 - Payment provider (must support the target countries and the chosen payment methods)
 - Email delivery provider
+- Custom domain decision (needed to place website and API on the same site for reliable browser session cookies)
 - Final membership access rules and refund policy
 - Whether scholarship browsing is public or some features require membership
 - Domain and production hosting configuration
