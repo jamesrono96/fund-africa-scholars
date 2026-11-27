@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jamesrono96.github.io/fund-africa-scholars/sitemap.xml
