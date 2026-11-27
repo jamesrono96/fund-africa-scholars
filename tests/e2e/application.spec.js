@@ -18,7 +18,7 @@ test("account page switches tabs and signs in with a mocked API", async ({ page 
 
   await page.goto("/account.html");
   await expect(page.getByRole("heading", { name: "Your scholarship journey starts here." })).toBeVisible();
-  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByRole("tab", { name: "Create account" }).click();
   await expect(page.locator("#register-form")).toBeVisible();
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.locator("#login-email").fill("student@example.test");
@@ -85,7 +85,7 @@ test("student can register and sign out in the account interface", async ({ page
   );
 
   await page.goto("/account.html");
-  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByRole("tab", { name: "Create account" }).click();
   await page.locator("#full-name").fill("New Student");
   await page.locator("#register-email").fill("newstudent@example.test");
   await page.locator("#country").fill("Somalia");
