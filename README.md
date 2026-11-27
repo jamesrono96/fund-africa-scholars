@@ -4,7 +4,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Development status
 
-**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Browser-level end-to-end testing, cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
+**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Playwright browser tests now cover account sign-in UI, API failure feedback and directory filtering with mocked API responses; live cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
 
 ## Planned features
 
@@ -58,7 +58,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 The GitHub Pages preview uses the Cloudflare development Worker at `https://fund-africa-scholars-api.jamesrono96.workers.dev` and the configured D1 database. The base schema and numbered migrations were successfully applied in the development database, and the development Worker deployment workflow has succeeded. Browser-level end-to-end testing and cross-site session-cookie validation remain outstanding. Payment processing and production deployment are not enabled.
 
-See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence and [the controlled browser testing guide](docs/DEVELOPMENT_TESTING.md) for test procedures and release blockers.
+Run browser tests with `npm run test:e2e`. See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence and [the controlled browser testing guide](docs/DEVELOPMENT_TESTING.md) for live development test procedures and release blockers.
 
 
 ## Scholarship discovery foundation
