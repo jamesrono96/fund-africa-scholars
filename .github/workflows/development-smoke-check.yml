@@ -1,0 +1,62 @@
+name: Development website and API smoke check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: development-smoke-check
+  cancel-in-progress: true
+
+jobs:
+  smoke-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check public website
+        run: |
+          curl --fail --silent --show-error --location \
+            --output /tmp/fas-home.html \
+            --write-out "Homepage HTTP %{http_code}\n" \
+            https://jamesrono96.github.io/fund-africa-scholars/
+          grep -q "Fund Africa Scholars" /tmp/fas-home.html
+
+      - name: Check API health and CORS
+        run: |
+          curl --fail --silent --show-error \
+            -H "Origin: https://jamesrono96.github.io" \
+            -D /tmp/fas-health-headers.txt \
+            -o /tmp/fas-health.json \
+            --write-out "API health HTTP %{http_code}\n" \
+            https://fund-africa-scholars-api.jamesrono96.workers.dev/api/health
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const data = JSON.parse(fs.readFileSync("/tmp/fas-health.json", "utf8"));
+            if (data.status !== "ok" || data.service !== "fund-africa-scholars-api") {
+              throw new Error("Unexpected API health response");
+            }
+            const headers = fs.readFileSync("/tmp/fas-health-headers.txt", "utf8").toLowerCase();
+            if (!headers.includes("access-control-allow-origin: https://jamesrono96.github.io")) {
+              throw new Error("Expected website CORS origin was not returned");
+            }
+            console.log("API health and website CORS passed.");
+          '
+
+      - name: Check public scholarship endpoint
+        run: |
+          curl --fail --silent --show-error \
+            -H "Origin: https://jamesrono96.github.io" \
+            -o /tmp/fas-scholarships.json \
+            --write-out "Public scholarships HTTP %{http_code}\n" \
+            "https://fund-africa-scholars-api.jamesrono96.workers.dev/api/scholarships?limit=1"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const data = JSON.parse(fs.readFileSync("/tmp/fas-scholarships.json", "utf8"));
+            if (!Array.isArray(data.scholarships) || typeof data.count !== "number") {
+              throw new Error("Unexpected public scholarship response shape");
+            }
+            console.log("Public scholarship endpoint returned a valid response.");
+          '
