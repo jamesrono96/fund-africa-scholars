@@ -62,3 +62,39 @@ test("directory displays an honest empty state and submits search filters", asyn
   expect(requestedUrl).toContain("level=Masters");
   await expect(page.locator("#results")).toContainText("No verified scholarships match");
 });
+
+test("student can register and sign out in the account interface", async ({ page }) => {
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: "Sign in required." }) })
+  );
+  await page.route(`${API}/api/auth/register`, async route => {
+    const payload = route.request().postDataJSON();
+    expect(payload).toMatchObject({
+      full_name: "New Student",
+      email: "newstudent@example.test",
+      country_of_residence: "Somalia",
+      password: "A-Secure-Test-Password-123"
+    });
+    await route.fulfill({
+      status: 201, contentType: "application/json",
+      body: JSON.stringify({ user: { id: "new-student", full_name: "New Student", email: "newstudent@example.test", country_of_residence: "Somalia" } })
+    });
+  });
+  await page.route(`${API}/api/auth/logout`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ message: "Signed out." }) })
+  );
+
+  await page.goto("/account.html");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.locator("#full-name").fill("New Student");
+  await page.locator("#register-email").fill("newstudent@example.test");
+  await page.locator("#country").fill("Somalia");
+  await page.locator("#register-password").fill("A-Secure-Test-Password-123");
+  await page.locator("#register-form button[type=submit]").click();
+
+  await expect(page.locator("#profile-name")).toHaveText("New Student");
+  await expect(page.locator("#register-password")).toHaveValue("");
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page.locator("#auth-panel")).toBeVisible();
+  await expect(page.locator("#auth-message")).toContainText("You have signed out");
+});
