@@ -80,7 +80,6 @@
         body: { email: $("login-email").value.trim(), password: $("login-password").value }
       });
       loginForm.reset();
-      registerForm.reset();
       showDashboard(data.user);
     } catch (error) {
       setMessage(message, error.message, "error");
@@ -105,6 +104,7 @@
           password: $("register-password").value
         }
       });
+      registerForm.reset();
       showDashboard(data.user);
     } catch (error) {
       setMessage(message, error.message, "error");
