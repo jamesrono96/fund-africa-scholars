@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   deploy-development:
-    if: ${{ inputs.confirm_development == 'deploy-development-api' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm_development == 'deploy-development-api' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
