@@ -3,6 +3,9 @@
 "use strict";
 const API_BASE=window.FAS_API_BASE||"https://fund-africa-scholars-api.jamesrono96.workers.dev";
 const $=id=>document.getElementById(id);
+const PAGE_SIZE=20;
+let currentOffset=0;
+let hasMore=false;
 $("year").textContent=new Date().getFullYear();
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeArray(value){try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch{return [];}}
@@ -46,21 +49,31 @@ async function loadRecommendations(){
   render(data.scholarships,"recommended-results",null);
  }catch{/* Recommendations are optional; public directory remains available. */}
 }
-async function search(event){
+async function search(event, offset=0){
  if(event)event.preventDefault();
+ currentOffset=offset;
  const params=new URLSearchParams();
  const values={q:$("q").value.trim(),country:$("country").value.trim(),level:$("level").value,subject:$("subject").value.trim(),funding:$("funding").value,deadline:$("deadline").value,eligibility:$("eligibility").value.trim()};
  for(const [key,value] of Object.entries(values)){if(value)params.set(key,value);}
- params.set("limit","50");
+ params.set("limit",String(PAGE_SIZE));
+ params.set("offset",String(currentOffset));
  $("status").textContent="Searching verified listings…";$("count").textContent="";$("results").replaceChildren(node("div","Searching…","empty"));
  try{
   const response=await fetch(API_BASE+"/api/scholarships?"+params.toString(),{headers:{Accept:"application/json"},credentials:"omit"});
   if(!response.ok)throw new Error(response.status===404?"The scholarship API is not connected yet.":"Scholarship listings are temporarily unavailable.");
   const data=await response.json();const items=Array.isArray(data.scholarships)?data.scholarships:[];
-  render(items);$("status").textContent=items.length?"Showing verified opportunities. Confirm details on each official provider website.":"No published verified scholarships are available for this search yet.";
+  hasMore=Boolean(data.has_more);
+  render(items);
+  $("pagination").hidden=!items.length;
+  $("previous-page").disabled=currentOffset===0;
+  $("next-page").disabled=!hasMore;
+  $("page-label").textContent="Page "+(Math.floor(currentOffset/PAGE_SIZE)+1);
+  $("status").textContent=items.length?"Showing verified opportunities. Confirm details on each official provider website.":"No published verified scholarships are available for this search yet.";
  }catch(error){$("results").replaceChildren(node("div","The directory is being prepared. Scholarship records will appear here once the database and API are connected.","empty"));$("status").textContent=error.message;}
 }
-$("filter-form").addEventListener("submit",search);
+$("filter-form").addEventListener("submit",event=>search(event,0));
+$("previous-page").addEventListener("click",()=>search(null,Math.max(0,currentOffset-PAGE_SIZE)));
+$("next-page").addEventListener("click",()=>{if(hasMore)search(null,currentOffset+PAGE_SIZE);});
 search();
 loadRecommendations();
 })();
