@@ -1,6 +1,13 @@
 name: Deploy development Worker
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - 'wrangler.toml'
+      - 'scripts/check-d1-target.mjs'
+      - '.github/workflows/deploy-dev-worker.yml'
   workflow_dispatch:
     inputs:
       confirm_development:
