@@ -118,7 +118,7 @@ test("public scholarship queries are restricted to verified published records", 
   const db = new MockD1();
   const response = await worker.fetch(request("/api/scholarships?limit=10"), { DB: db });
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { scholarships: [], count: 0, limit: 10 });
+  assert.deepEqual(await response.json(), { scholarships: [], count: 0, limit: 10, offset: 0, has_more: false });
   assert.match(db.statements[0].sql, /publication_status = 'published'/);
   assert.match(db.statements[0].sql, /verification_status = 'verified'/);
 });
@@ -446,4 +446,21 @@ test("scheduled discovery safely skips when D1 is unavailable", async () => {
   const result = await runScheduledDiscovery({}, 5);
   assert.equal(result.skipped, true);
   assert.equal(result.checked, 0);
+});
+
+
+test("public scholarship pagination validates offsets and uses an extra row to detect next page", async () => {
+  const db = new MockD1();
+  const response = await worker.fetch(request("/api/scholarships?limit=20&offset=40"), { DB: db });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { scholarships: [], count: 0, limit: 20, offset: 40, has_more: false });
+  assert.match(db.statements[0].sql, /LIMIT \? OFFSET \?/);
+  assert.deepEqual(db.statements[0].values.slice(-2), [21, 40]);
+});
+
+test("public scholarship pagination rejects invalid offsets", async () => {
+  const db = new MockD1();
+  const response = await worker.fetch(request("/api/scholarships?offset=-1"), { DB: db });
+  assert.equal(response.status, 400);
+  assert.equal(db.statements.length, 0);
 });
