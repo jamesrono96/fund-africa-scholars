@@ -6,7 +6,7 @@ The repository remains the development workspace. The development Worker and D1 
 
 - [x] Create repository and initial landing page
 - [x] Define initial data model and API foundation
-- [x] Add student account page and frontend sign-in/registration interactions (API connection pending)
+- [x] Add student account page and frontend sign-in/registration interactions
 - [ ] Establish reusable frontend component structure and design system
 - [ ] Add accessibility, responsive-layout and form-validation checks
 
@@ -31,13 +31,13 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Password hashing and HTTP-only session cookie foundation
 - [x] Logout and current-session endpoint
 - [x] Basic login/registration rate-limit foundation
-- [x] Apply schema and migrations to the development D1 database
+- [x] Apply base schema and numbered migrations to development D1; GitHub Actions verified expected tables
 - [ ] Email verification and password reset
-- [ ] Add CSRF protections and production security review
-- [x] Student profile and study-destination preferences API and dashboard interface (backend configuration pending)
-- [x] Private recommendations for verified scholarships matching preferred destinations (backend configuration pending)
-- [x] Saved-scholarships API with per-user ownership checks (backend configuration pending)
-- [x] Application-tracker API with per-user ownership checks (backend configuration pending)
+- [ ] Validate cross-site cookie behavior and complete CSRF/production security review
+- [x] Student profile and study-destination preferences API and dashboard interface
+- [x] Private recommendations for verified scholarships matching preferred destinations
+- [x] Saved-scholarships API with per-user ownership checks
+- [x] Application-tracker API with per-user ownership checks
 - [x] Student dashboard interface for saved opportunities, status updates and private notes
 - [ ] Server-side authorization and security review for all private endpoints
 
