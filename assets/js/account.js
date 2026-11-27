@@ -1,7 +1,7 @@
 /* Student account interface. Configure API_BASE only when a backend is deployed. */
 (() => {
   "use strict";
-  const API_BASE = window.FAS_API_BASE || "";
+  const API_BASE = window.FAS_API_BASE || "https://fund-africa-scholars-api.jamesrono96.workers.dev";
   const $ = (id) => document.getElementById(id);
   const authPanel = $("auth-panel");
   const dashboard = $("dashboard");
