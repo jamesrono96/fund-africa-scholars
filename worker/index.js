@@ -55,7 +55,7 @@ function cookieValue(request, name) {
 }
 
 function sessionCookie(token, maxAge = SESSION_SECONDS) {
-  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${maxAge}`;
 }
 
 function base64url(bytes) {
