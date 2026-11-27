@@ -148,7 +148,7 @@ test("student dashboard loads private workspace and saves profile preferences", 
   await expect(page.locator("#profile-email")).toHaveValue("student@example.test");
   await page.locator("#profile-name").fill("Test Student Updated");
   await page.locator("#profile-country").fill("Somalia");
-  await page.locator("#destination-options input[value="Canada"]").check();
+  await page.locator('#destination-options input[value="Canada"]').check();
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.locator("#status")).toContainText("profile and study preferences have been saved");
   expect(savedProfile).toMatchObject({
