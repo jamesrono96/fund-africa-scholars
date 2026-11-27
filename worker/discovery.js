@@ -245,6 +245,30 @@ async function aiExtractCandidate(candidateId, env, adminId) {
   return {candidate_id:candidateId,extracted,source_changed:changed,message:"AI suggestions saved with exact-quote checks. Verify every item against the official page; nothing was verified or published."};
 }
 
+
+/**
+ * Scheduled checks only inspect sources explicitly registered and activated by an
+ * administrator. Results stay in the private candidate queue; nothing is verified
+ * or published by this background task.
+ */
+export async function runScheduledDiscovery(env, limit = 5) {
+  if (!env.DB) return { checked: 0, skipped: true, reason: "D1 is not configured." };
+  const safeLimit = Math.min(Math.max(Number(limit) || 5, 1), 10);
+  const due = await env.DB.prepare(`
+    SELECT id,name,official_domain,source_url,source_type,country,check_frequency_days
+    FROM scholarship_sources
+    WHERE is_active=1
+      AND (last_checked_at IS NULL OR datetime(last_checked_at) <= datetime('now', '-' || check_frequency_days || ' days'))
+    ORDER BY last_checked_at IS NULL DESC, last_checked_at ASC
+    LIMIT ?
+  `).bind(safeLimit).all();
+  const results = [];
+  for (const source of due.results || []) {
+    results.push({ source: source.name, ...(await scanSource(source, env.DB, null)) });
+  }
+  return { checked: results.length, results };
+}
+
 export async function handleDiscovery(request, env, url) {
   const mutation = ["POST", "PATCH", "DELETE"].includes(request.method);
   if (mutation && !originAllowed(request, env)) return json({ error: "Request origin is not allowed." }, 403);
