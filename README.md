@@ -58,7 +58,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 The GitHub Pages preview uses the Cloudflare development Worker at `https://fund-africa-scholars-api.jamesrono96.workers.dev` and the configured D1 database. The base schema and numbered migrations were successfully applied in the development database, and the development Worker deployment workflow has succeeded. Browser-level end-to-end testing and cross-site session-cookie validation remain outstanding. Payment processing and production deployment are not enabled.
 
-See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence.
+See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence and [the controlled browser testing guide](docs/DEVELOPMENT_TESTING.md) for test procedures and release blockers.
 
 
 ## Scholarship discovery foundation
