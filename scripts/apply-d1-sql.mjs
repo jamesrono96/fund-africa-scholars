@@ -1,9 +1,16 @@
 import { readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import process from "node:process";
 
+const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+const token = process.env.CLOUDFLARE_API_TOKEN;
+const databaseId = process.env.D1_DATABASE_ID || "508c3318-27e2-4985-8947-1a84218997a2";
 const database = process.env.D1_DATABASE_NAME || "fund-africa-scholars-db";
 const file = process.argv[2];
+
+if (!accountId || !token) {
+  console.error("Missing CLOUDFLARE_ACCOUNT_ID or CLOUDFLARE_API_TOKEN.");
+  process.exit(2);
+}
 if (!file) {
   console.error("Usage: node scripts/apply-d1-sql.mjs <sql-file>");
   process.exit(2);
@@ -78,11 +85,35 @@ if (!statements.length) {
   process.exit(0);
 }
 
-console.log(`Applying ${statements.length} SQL statements from ${file} to ${database}.`);
+const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`;
+console.log(`Applying ${statements.length} SQL statements to ${database} through the Cloudflare D1 API.`);
+
 for (let index = 0; index < statements.length; index += 1) {
-  const statement = statements[index];
-  console.log(`[${index + 1}/${statements.length}] ${statement.split("\\n")[0].slice(0, 100)}`);
-  execFileSync("npx", [
-    "wrangler", "d1", "execute", database, "--remote", `--command=${statement}`
-  ], { stdio: "inherit", env: process.env });
+  const sql = statements[index];
+  console.log(`[${index + 1}/${statements.length}] ${sql.split("\n")[0].slice(0, 100)}`);
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ sql }),
+  });
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error(`Cloudflare D1 API returned non-JSON response (HTTP ${response.status}).`);
+  }
+
+  if (!response.ok || payload.success !== true) {
+    const details = (payload.errors || [])
+      .map((item) => `${item.code ?? "?"}: ${item.message ?? "Unknown Cloudflare API error"}`)
+      .join("; ") || `HTTP ${response.status}`;
+    throw new Error(`D1 API rejected statement ${index + 1}/${statements.length}: ${details}`);
+  }
 }
+
+console.log(`Successfully applied ${statements.length} SQL statements to ${database}.`);
