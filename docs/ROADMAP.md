@@ -77,7 +77,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [ ] Curated list of official provider sources
 - [x] Admin-triggered official-source link scan foundation (same-domain links only; no AI extraction)
 - [x] Discovery run history and scan result audit trail
-- [ ] Scheduled discovery jobs
+- [x] Daily scheduled checks for active registered sources (maximum five per run; human review only)
 - [ ] Duplicate detection
 - [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder
 - [x] Rule-based official-page extraction suggestions for eligibility, funding, study levels and deadline clues (manual review required)
