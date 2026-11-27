@@ -1,6 +1,6 @@
 # Fund Africa Scholars — Build Roadmap
 
-The repository is the development workspace. Deployment is deliberately postponed until the owner approves it.
+The repository remains the development workspace. The development Worker and D1 database are deployed; production deployment remains disabled pending owner approval.
 
 ## Phase 1 — Product foundation
 
@@ -31,7 +31,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Password hashing and HTTP-only session cookie foundation
 - [x] Logout and current-session endpoint
 - [x] Basic login/registration rate-limit foundation
-- [ ] Apply migration and configure a development database
+- [x] Apply schema and migrations to the development D1 database
 - [ ] Email verification and password reset
 - [ ] Add CSRF protections and production security review
 - [x] Student profile and study-destination preferences API and dashboard interface (backend configuration pending)
@@ -61,7 +61,7 @@ The repository is the development workspace. Deployment is deliberately postpone
 - [x] Admin-only create, edit, archive and review API foundations
 - [x] Verification required before publication
 - [x] Admin action audit-log foundation
-- [ ] Configure database and securely promote the owner's admin account
+- [x] Configure development database; [ ] securely promote the owner's admin account
 - [ ] User and membership management
 - [ ] Audit log for sensitive actions
 - [ ] Role-based access control
@@ -100,7 +100,8 @@ The repository is the development workspace. Deployment is deliberately postpone
 
 - [x] GitHub Actions JavaScript syntax checks
 - [x] Automated SQLite schema/migration application and integrity check
-- [ ] Worker/API unit and integration tests against a D1-compatible development environment
+- [x] Worker API security smoke tests and SQLite migration validation in GitHub Actions
+- [ ] Browser end-to-end tests against the live development Worker/D1
 - [ ] Security review and dependency review
 - [ ] Accessibility and mobile checks
 - [ ] Backup and recovery plan
