@@ -10,7 +10,7 @@ compatibility_date = "2026-11-07"
 [[d1_databases]]
 binding = "DB"
 database_name = "fund-africa-scholars-db"
-database_id = "508c3318-27e2-4985-8947-1a84218997a2"
+database_id = "508c3318-27e2-4985-8947-1a84219897a2"
 
 [vars]
 APP_ENV = "development"
