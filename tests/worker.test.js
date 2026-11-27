@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.js";
+import { runScheduledDiscovery } from "../worker/discovery.js";
 
 class MockD1 {
   statements = [];
@@ -429,4 +430,20 @@ test("admin discovery summary reports candidate, field-review and run totals", a
     field_reviews:{approved:4,needs_follow_up:2},
     runs:{completed:5,failed:1}
   });
+});
+
+
+test("scheduled discovery checks only active registered sources that are due", async () => {
+  const db = new MockD1();
+  const result = await runScheduledDiscovery({ DB: db }, 5);
+  assert.deepEqual(result, { checked: 0, results: [] });
+  assert.match(db.statements[0].sql, /WHERE is_active=1/);
+  assert.match(db.statements[0].sql, /last_checked_at IS NULL/);
+  assert.equal(db.statements[0].values[0], 5);
+});
+
+test("scheduled discovery safely skips when D1 is unavailable", async () => {
+  const result = await runScheduledDiscovery({}, 5);
+  assert.equal(result.skipped, true);
+  assert.equal(result.checked, 0);
 });
