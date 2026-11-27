@@ -23,7 +23,7 @@ test("account page switches tabs and signs in with a mocked API", async ({ page 
   await page.locator("#login-tab").click();
   await page.locator("#login-email").fill("student@example.test");
   await page.locator("#login-password").fill("CorrectHorseBatteryStaple!");
-  await page.locator("#login-form button[type=submit]").click();
+  await page.locator("#login-form button").click();
 
   await expect(page.locator("#profile-name")).toHaveText("Test Student");
   await expect(page.locator("#profile-email")).toHaveText("student@example.test");
@@ -246,7 +246,7 @@ test("admin interface denies a signed-in student account", async ({ page }) => {
   await page.goto("/admin.html");
   await page.locator("#email").fill("student@example.test");
   await page.locator("#password").fill("Test-Only-Password-123");
-  await page.locator("#login-form button[type=submit]").click();
+  await page.locator("#login-form button").click();
   await expect(page.locator("#login-message")).toContainText("does not have administrator permissions");
   await expect(page.locator("#admin-panel")).toBeHidden();
   await expect(page.locator("#login-panel")).toBeVisible();
@@ -285,7 +285,7 @@ test("admin dashboard loads mocked records and discovery metrics without publish
   await page.goto("/admin.html");
   await page.locator("#email").fill("admin@example.test");
   await page.locator("#password").fill("Test-Only-Admin-Password-123");
-  await page.locator("#login-form button[type=submit]").click();
+  await page.locator("#login-form button").click();
   await expect(page.locator("#admin-panel")).toBeVisible();
   await expect(page.locator("#login-panel")).toBeHidden();
   await expect(page.locator("#list-message")).toContainText("0 record(s) loaded");
