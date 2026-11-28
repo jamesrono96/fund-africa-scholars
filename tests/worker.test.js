@@ -339,18 +339,25 @@ test("unpaid students cannot access premium endpoints", async () => {
       };
     }
   }
-  for (const path of [
-    "/api/student/recommendations", "/api/student/saved",
-    "/api/student/applications"
-  ]) {
+  const requests = [
+    ["/api/student/recommendations", "GET"],
+    ["/api/student/saved", "GET"],
+    ["/api/student/saved", "POST", { scholarship_id: "scholarship-1" }],
+    ["/api/student/saved/scholarship-1", "DELETE"],
+    ["/api/student/applications", "GET"],
+    ["/api/student/applications", "POST", { scholarship_id: "scholarship-1", status: "interested" }],
+    ["/api/student/applications/123e4567-e89b-12d3-a456-426614174000", "PATCH", { status: "submitted" }]
+  ];
+  for (const [path, method, body] of requests) {
     const db = new UnpaidStudentDB();
-    const response = await worker.fetch(studentRequest(path, "GET"), {
+    const response = await worker.fetch(studentRequest(path, method, body), {
       DB: db, APP_ORIGIN: "https://app.example.test"
     });
-    assert.equal(response.status, 402, path);
+    assert.equal(response.status, 402, method + " " + path);
     const data = await response.json();
     assert.equal(data.code, "PREMIUM_MEMBERSHIP_REQUIRED");
     assert.deepEqual(data.price, { amount_minor: 500, currency: "USD", term: "lifetime" });
+    assert.equal(db.statements.some(item => /^(INSERT|UPDATE|DELETE)/i.test(item.sql.trim())), false);
   }
 });
 
