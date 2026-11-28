@@ -17,20 +17,22 @@ The repository contains:
 - GitHub Actions for validation, browser tests, CodeQL, Pages preview and development service smoke checks.
 - Draft operational, release and source-verification documentation.
 
-## 2. Approved membership direction
-The owner has confirmed:
-- **USD $5 one-time lifetime membership.**
-- **Free scholarship browsing:** public users can browse, search and view scholarship details without paying.
-- **Premium features:** selected student-support tools will be reserved for lifetime members.
-- **Payments remain disabled** until the owner separately approves payment integration and activation.
+## 2. Owner-approved membership policy
+- **USD $5 paid once for lifetime membership.**
+- **Free for everyone:** browse, search and view scholarship details and official application links.
+- **All five premium features for lifetime members:**
+  1. Save/bookmark scholarships.
+  2. Application tracker.
+  3. Deadline watch and reminders.
+  4. Private application notes.
+  5. Enhanced personalised recommendations.
+- One payment grants the five features for life; this is not a recurring subscription and does not expire after three months.
+- Payments remain disabled until the owner separately approves payment integration and live activation.
 
-Suggested premium boundary for planning (not yet an enforced paywall): saved/bookmarked scholarships, application tracking, deadline watch/reminders, private application notes and enhanced personalised recommendations. Confirm the final list and existing-account treatment before adding access enforcement.
+Membership entitlements must be enforced server-side after independently verified payment. No client-side switch, redirect or editable browser value may grant paid access.
 
 ## 3. Latest automated checks
-Latest reviewed GitHub Actions runs on commit `ff879cf`:
-- Application validation: passed.
-- CodeQL security analysis: passed.
-- GitHub Pages preview: passed.
+Latest reviewed GitHub Actions runs on commit `8942928` were queued at the time of the last check. Do not treat those as passing until the runs finish successfully. The preceding reviewed commit `ff879cf` passed application validation, CodeQL and GitHub Pages preview.
 
 Earlier validation included JavaScript syntax checks, npm audit at high severity, Worker API security smoke tests, Playwright browser tests and SQLite schema/migration integrity checks. A passing CI run is not a substitute for end-to-end tests against the live development Worker/D1 or a security audit.
 
@@ -43,10 +45,9 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 - Complete manual keyboard, screen-reader and real-device/mobile review.
 - Configure automated development backups and rehearse a restore.
 - Complete independent security review of private endpoints, CSRF/origin controls and session cookie behaviour.
-- Design premium entitlements and test their server-side enforcement only after the owner confirms the exact feature boundary.
+- Implement and test server-side membership entitlements only after payment integration has been separately approved.
 
 ## 5. Owner actions — required before final operational setup
-
 ### A. Approve source registry and reviewers
 - Review `INITIAL_OFFICIAL_SOURCE_REGISTRY.md`.
 - Confirm initial destinations and providers.
@@ -73,13 +74,13 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 - Obtain qualified review of privacy notice, terms, data retention, membership and refund terms.
 - Configure support and privacy-request contact details.
 
-### E. Confirm premium entitlements and payment activation
-- Confirm the final premium feature list and treatment of existing accounts.
-- Draft and legally review membership, refund and support terms.
-- Choose a provider supporting target countries and methods only when ready.
+### E. Payment integration and activation (still owner-gated)
 - Owner must separately approve payment integration before any provider or checkout is connected.
-- Test signed webhooks, idempotency and success/failure/pending/refund/dispute cases in test mode.
-- Live payment activation requires another explicit owner approval.
+- Select a provider supporting target countries and payment methods.
+- Agree settlement currency, refunds, failed/pending payments, disputes and support.
+- Implement signed webhooks, idempotency and audit logging only after approval.
+- Test successful, failed, pending, duplicate, refunded and disputed cases in test mode.
+- Obtain separate explicit owner approval before live payments are activated.
 
 ### F. Optional AI
 - Decide whether Workers AI should be enabled.
@@ -101,10 +102,10 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 4. Select email provider and sender domain; complete verification/reset workflows.
 5. Choose custom domain and production hosting architecture.
 6. Obtain privacy/legal review and complete independent security review.
-7. Confirm the final premium feature boundary and membership terms.
+7. Complete membership entitlement design and publish legally reviewed terms.
 8. Approve payment integration separately when ready; keep live payments off until final approval.
 9. Approve production deployment explicitly.
 10. Run a final owner acceptance test before inviting real students.
 
 ## Final status
-The development foundation and automated checks are in place, and the membership direction is now approved. The project is not fully launched. Remaining work includes technical testing and owner-controlled provider, account, legal and deployment decisions. Payments remain disabled by explicit owner instruction.
+The USD $5 lifetime membership policy and all five premium benefits are approved. Scholarship browsing remains free. The project is not fully launched; technical testing and owner-controlled provider, account, legal and deployment decisions remain. Payments remain disabled by explicit owner instruction.
