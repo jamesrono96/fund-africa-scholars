@@ -83,7 +83,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Admin-triggered official-source link scan foundation (same-domain links only; no AI extraction)
 - [x] Discovery run history and scan result audit trail
 - [x] Daily scheduled checks for active registered sources (maximum five per run; human review only)
-- [ ] Duplicate detection
+- [x] Duplicate candidate detection using normalized official URLs and content fingerprints
 - [x] Convert accepted candidates into unpublished scholarship drafts with explicit unverified eligibility placeholder
 - [x] Rule-based official-page extraction suggestions for eligibility, funding, study levels and deadline clues (manual review required)
 - [x] Evidence-backed structured extraction suggestions with excerpts and conservative review-confidence labels (rule-based)
