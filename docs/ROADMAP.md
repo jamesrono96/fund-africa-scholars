@@ -108,6 +108,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Add regression tests confirming logout rejects untrusted origins and revokes the current session for the configured origin
 - [x] Document a controlled browser test plan, safe test-data rules and release blockers
 - [x] Add Playwright browser tests for account tab switching, mocked sign-in, API failure feedback and directory filter submission
+- [x] Add Playwright mobile-width overflow checks for all primary pages and accessibility assertions for account and directory forms
 - [ ] Browser end-to-end tests against the live development Worker/D1
 - [x] Publish a manual browser smoke-test guide for public, student and admin flows
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
