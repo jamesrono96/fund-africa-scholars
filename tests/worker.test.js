@@ -631,3 +631,44 @@ test("admin user and audit endpoints reject unauthenticated access", async () =>
     assert.equal(response.status, 403);
   }
 });
+
+
+test("admin pagination rejects partially numeric query values", async () => {
+  class AuthDB extends MockD1 {
+    prepare(sql) {
+      const prepared = {
+        bind: () => prepared,
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "admin-1", role: "admin" } : null,
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 0 } })
+      };
+      return prepared;
+    }
+  }
+  for (const path of ["/api/admin/users?limit=10items", "/api/admin/audit-logs?offset=2.5"]) {
+    const response = await worker.fetch(request(path, {
+      headers: { cookie: "fas_session=admin-token" }
+    }), { DB: new AuthDB() });
+    assert.equal(response.status, 400);
+  }
+});
+
+test("student-role sessions cannot access administrative read APIs", async () => {
+  class StudentRoleDB extends MockD1 {
+    prepare(sql) {
+      const prepared = {
+        bind: () => prepared,
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "student-1", role: "student" } : null,
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 0 } })
+      };
+      return prepared;
+    }
+  }
+  for (const path of ["/api/admin/users", "/api/admin/audit-logs"]) {
+    const response = await worker.fetch(request(path, {
+      headers: { cookie: "fas_session=student-token" }
+    }), { DB: new StudentRoleDB() });
+    assert.equal(response.status, 403);
+  }
+});
