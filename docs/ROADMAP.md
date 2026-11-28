@@ -148,7 +148,6 @@ See [OWNER_DECISIONS.md](OWNER_DECISIONS.md) for the specific owner inputs and a
 - Email delivery provider
 - Custom domain decision (needed to place website and API on the same site for reliable browser session cookies)
 - Jurisdiction-specific review of membership terms and no-voluntary-refund policy
-- Whether scholarship browsing is public or some features require membership
 - Domain and production hosting configuration
 
 No production credentials should be added to GitHub. Use encrypted environment secrets when deployment is eventually approved.
