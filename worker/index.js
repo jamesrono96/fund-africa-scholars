@@ -7,7 +7,10 @@ const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
   "x-content-type-options": "nosniff",
-  "referrer-policy": "same-origin"
+  "referrer-policy": "same-origin",
+  "x-frame-options": "DENY",
+  "strict-transport-security": "max-age=31536000",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()"
 };
 
 const SESSION_COOKIE = "fas_session";
@@ -37,6 +40,7 @@ function corsHeaders(request, env) {
 
 function withCors(response, cors) {
   const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(JSON_HEADERS)) headers.set(key, value);
   for (const [key, value] of Object.entries(cors)) headers.set(key, value);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
