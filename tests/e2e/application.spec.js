@@ -302,3 +302,24 @@ test("admin dashboard loads mocked records and discovery metrics without publish
   await expect(page.locator("#login-panel")).toBeVisible();
   await expect(page.locator("#password")).toHaveValue("");
 });
+
+test("student dashboard deadline watch highlights deadlines within 30 days", async ({ page }) => {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + 5);
+  const deadline = date.toISOString().slice(0, 10);
+  const saved = [{ id: "deadline-scholarship", title: "Deadline Test Award", provider: "Example University",
+    destination_country: "Canada", application_deadline: deadline, official_url: "https://university.example/deadline" }];
+  await page.route(API + "/api/auth/me", route => route.fulfill({ status: 200, contentType: "application/json",
+    body: JSON.stringify({ user: { full_name: "Test Student", email: "student@example.test" } }) }));
+  await page.route(API + "/api/student/saved", route => route.fulfill({ status: 200, contentType: "application/json",
+    body: JSON.stringify({ scholarships: saved }) }));
+  await page.route(API + "/api/student/applications", route => route.fulfill({ status: 200, contentType: "application/json",
+    body: JSON.stringify({ applications: [] }) }));
+  await page.route(API + "/api/student/profile", route => route.fulfill({ status: 200, contentType: "application/json",
+    body: JSON.stringify({ profile: { full_name: "Test Student", email: "student@example.test",
+      country_of_residence: "Somalia", preferred_destinations: [] } }) }));
+  await page.goto("/dashboard.html");
+  await expect(page.locator("#deadline-list")).toContainText("Deadline Test Award");
+  await expect(page.locator("#deadline-list")).toContainText("5 day(s) remaining");
+  await expect(page.locator("#deadline-list a")).toHaveAttribute("href", "https://university.example/deadline");
+});
