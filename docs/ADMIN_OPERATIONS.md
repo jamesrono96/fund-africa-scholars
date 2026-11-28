@@ -32,13 +32,9 @@ Returns a paginated audit history with action, target, recorded details, timesta
 
 The admin dashboard includes read-only, paginated tables for student accounts and audit events. The user table shows account identity, country, role, email-verification state, membership status and registration date. The audit table shows timestamp, actor, action, target and recorded details. Both views call the protected read-only endpoints above; neither offers account or membership mutations.
 
-## Admin dashboard views
-
-The admin dashboard includes read-only, paginated tables for student accounts and audit events. The user table shows account identity, country, role, email-verification state, membership status and registration date. The audit table shows timestamp, actor, action, target and recorded details. Both views call the protected read-only endpoints above; neither offers account or membership mutations.
-
 ## Deliberate limitations
 
 - These APIs are read-only. They do not edit users, promote administrators, change membership status, refund payments or delete accounts.
 - Membership actions must wait for confirmed payment-provider verification, entitlement rules, support procedures and refund/dispute policy.
 - No real student personal data should be entered into the GitHub Pages preview or development Worker.
-- The endpoints and regression tests still require execution in CI and browser/API acceptance testing before launch.
+- The automated regression tests run in GitHub Actions. Live development Worker/D1 acceptance testing, cross-browser session testing and owner review are still required before launch.
