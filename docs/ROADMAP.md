@@ -102,6 +102,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Automated SQLite schema/migration application and integrity check
 - [x] Worker API security smoke tests and SQLite migration validation in GitHub Actions
 - [x] Enforce streaming JSON request-size limits across authentication, student, scholarship-admin and discovery APIs, including requests without Content-Length
+- [x] Add baseline API response headers for MIME sniffing, clickjacking protection, HTTPS transport and disabled unused device permissions
+- [x] Add regression tests for baseline security headers on core and delegated student API responses
 - [x] Add regression test for oversized authentication request bodies
 - [x] Add regression tests confirming logout rejects untrusted origins and revokes the current session for the configured origin
 - [x] Document a controlled browser test plan, safe test-data rules and release blockers
