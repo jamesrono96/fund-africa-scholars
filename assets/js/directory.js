@@ -40,6 +40,11 @@ function render(items, rootId="results", countId="count"){
 async function loadRecommendations(){
  try{
   const response=await fetch(API_BASE+"/api/student/recommendations",{headers:{Accept:"application/json"},credentials:"include"});
+  if(response.status===402){
+   $("recommendations").classList.remove("hidden");
+   $("recommendation-note").textContent="Personalised recommendations are a premium feature. Scholarship browsing and searching remain free; a one-time USD $5 lifetime membership unlocks all five premium tools. Payment activation is not available yet.";
+   return;
+  }
   if(!response.ok)return;
   const data=await response.json();
   if(!Array.isArray(data.scholarships)||!data.scholarships.length){
