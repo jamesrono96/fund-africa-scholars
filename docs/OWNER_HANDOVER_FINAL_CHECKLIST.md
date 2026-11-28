@@ -32,9 +32,9 @@ The repository contains:
 Membership entitlements must be enforced server-side after independently verified payment. No client-side switch, redirect or editable browser value may grant paid access.
 
 ## 3. Latest automated checks
-Latest reviewed GitHub Actions runs on commit `8942928` were queued at the time of the last check. Do not treat those as passing until the runs finish successfully. The preceding reviewed commit `ff879cf` passed application validation, CodeQL and GitHub Pages preview.
+On commit `d6c2c5b`, the GitHub Actions application validation completed successfully, including JavaScript syntax, high-severity dependency audit, Worker API security tests, Playwright browser end-to-end tests and SQLite schema/migration integrity checks. CodeQL also completed successfully. The GitHub Pages preview workflow was still pending at the last status check.
 
-Earlier validation included JavaScript syntax checks, npm audit at high severity, Worker API security smoke tests, Playwright browser tests and SQLite schema/migration integrity checks. A passing CI run is not a substitute for end-to-end tests against the live development Worker/D1 or a security audit.
+These are automated CI checks against test fixtures and a local SQLite validation database. They do not substitute for live end-to-end tests against the development Worker/D1, cross-browser cookie/session testing or an independent security review.
 
 ## 4. Development tasks still requiring work
 - Run the controlled manual browser test plan against the current preview.
@@ -49,7 +49,8 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 - A membership-status endpoint and free-student dashboard state are implemented.
 - Public scholarship browsing remains free; premium endpoints return a clear membership-required response.
 - Live payment integration, signed webhooks and membership activation remain unimplemented until separately approved.
-- Run live Worker/D1 and cross-browser tests for both unpaid and paid synthetic test accounts.
+- [x] Add automated regression coverage for unpaid and active lifetime-member entitlement states in the Worker and student dashboard.
+- [ ] Run live Worker/D1 and cross-browser tests for both unpaid and paid synthetic test accounts.
 
 ## 5. Owner actions — required before final operational setup
 ### A. Approve source registry and reviewers
@@ -106,7 +107,7 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 4. Select email provider and sender domain; complete verification/reset workflows.
 5. Choose custom domain and production hosting architecture.
 6. Obtain privacy/legal review and complete independent security review.
-7. Complete membership entitlement design and publish legally reviewed terms.
+7. Review the implemented membership entitlement rules and publish legally reviewed membership, refund and support terms.
 8. Approve payment integration separately when ready; keep live payments off until final approval.
 9. Approve production deployment explicitly.
 10. Run a final owner acceptance test before inviting real students.
