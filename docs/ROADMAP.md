@@ -62,8 +62,10 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Verification required before publication
 - [x] Admin action audit-log foundation
 - [x] Configure development database; [ ] securely promote the owner's admin account
-- [ ] User and membership management
-- [ ] Audit log for sensitive actions
+- [x] Read-only admin user directory with membership status and bounded pagination
+- [x] Read-only admin audit-log viewer API with actor context and bounded pagination
+- [ ] User and membership management actions (remain disabled until payment and support policies are finalized)
+- [ ] Audit log UI and review of sensitive actions
 - [ ] Role-based access control
 - [ ] Safe handling of reported or expired opportunities
 
