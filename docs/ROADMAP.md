@@ -8,7 +8,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Define initial data model and API foundation
 - [x] Add student account page and frontend sign-in/registration interactions
 - [ ] Establish reusable frontend component structure and design system
-- [ ] Add accessibility, responsive-layout and form-validation checks
+- [x] Add automated mobile-width overflow checks and basic account/directory form accessibility assertions
+- [ ] Complete manual keyboard, screen-reader and real-device accessibility review
 
 ## Phase 2 — Scholarship directory
 
@@ -117,6 +118,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Document a controlled browser test plan, safe test-data rules and release blockers
 - [x] Add Playwright browser tests for account tab switching, mocked sign-in, API failure feedback and directory filter submission
 - [x] Add Playwright mobile-width overflow checks for all primary pages and accessibility assertions for account and directory forms
+- [x] Add Playwright regression coverage for student deadline watch and admin user/audit views
 - [ ] Browser end-to-end tests against the live development Worker/D1
 - [x] Publish a manual browser smoke-test guide for public, student and admin flows
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
@@ -124,7 +126,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Add scheduled CodeQL security analysis workflow (execution/results still require review)
 - [x] Configure weekly Dependabot checks for npm and GitHub Actions dependencies
 - [ ] Independent security review and dependency-alert remediation
-- [ ] Accessibility and mobile checks
+- [ ] Complete manual accessibility and real-device/mobile review after automated responsive checks
 - [x] Draft backup, recovery and incident-response runbook
 - [ ] Configure automated backups, retention, monitoring and perform a restore rehearsal
 - [ ] Privacy policy, terms and membership/refund terms
