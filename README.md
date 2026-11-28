@@ -113,3 +113,6 @@ The student dashboard includes a profile section for editing a student's display
 ### Destination-based recommendations
 
 Signed-in students can see a small set of published, verified scholarships whose destination country matches one of their saved study preferences. The recommendation endpoint is private, uses only the student's own preferences, and never includes draft or unverified records. The directory labels these as destination matches only; it does not claim that the student meets each scholarship's eligibility criteria. The recommendation endpoint is deployed with the development API; it still needs browser-level testing and verified scholarship records.
+
+
+Administrator API operations and access-control notes: [docs/ADMIN_OPERATIONS.md](docs/ADMIN_OPERATIONS.md).
