@@ -26,6 +26,8 @@ jobs:
           done
       - name: Install browser test dependencies
         run: npm install
+      - name: Audit installed dependencies
+        run: npm audit --audit-level=high
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run Worker API security smoke tests
