@@ -120,9 +120,12 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Publish a manual browser smoke-test guide for public, student and admin flows
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
 - [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
-- [ ] Security review and dependency review
+- [x] Add scheduled CodeQL security analysis workflow (execution/results still require review)
+- [x] Configure weekly Dependabot checks for npm and GitHub Actions dependencies
+- [ ] Independent security review and dependency-alert remediation
 - [ ] Accessibility and mobile checks
-- [ ] Backup and recovery plan
+- [x] Draft backup, recovery and incident-response runbook
+- [ ] Configure automated backups, retention, monitoring and perform a restore rehearsal
 - [ ] Privacy policy, terms and membership/refund terms
 - [ ] Production configuration review
 - [ ] Owner approval before deployment
