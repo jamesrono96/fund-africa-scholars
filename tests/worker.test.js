@@ -555,3 +555,68 @@ test("scheduled maintenance removes only expired sessions", async () => {
 test("session cleanup safely skips when D1 is unavailable", async () => {
   assert.deepEqual(await cleanupExpiredSessions(null), { skipped: true, deleted: 0 });
 });
+
+
+test("admin user directory is authenticated, paginated and includes membership status", async () => {
+  class AdminUsersDB extends MockD1 {
+    prepare(sql) {
+      const statement = { sql, values: [] }; this.statements.push(statement);
+      const prepared = {
+        bind: (...values) => { statement.values = values; return prepared; },
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "admin-1", role: "admin" } : null,
+        all: async () => sql.includes("LEFT JOIN memberships")
+          ? { results: [{ id: "student-1", email: "student@example.test", membership_status: null }] }
+          : { results: [] },
+        run: async () => ({ meta: { changes: 0 } })
+      };
+      return prepared;
+    }
+  }
+  const db = new AdminUsersDB();
+  const response = await worker.fetch(request("/api/admin/users?limit=10&offset=20", {
+    headers: { cookie: "fas_session=admin-token" }
+  }), { DB: db });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.users[0].email, "student@example.test");
+  assert.equal(data.users[0].membership_status, null);
+  assert.deepEqual(db.statements.find(x => x.sql.includes("LEFT JOIN memberships")).values, [11, 20]);
+});
+
+test("admin user directory rejects invalid pagination", async () => {
+  const response = await worker.fetch(request("/api/admin/users?limit=500"), {
+    headers: { cookie: "fas_session=admin-token" }
+  }, { DB: new MockD1() });
+  assert.equal(response.status, 403);
+});
+
+test("admin audit log is authenticated and returns actor context", async () => {
+  class AuditDB extends MockD1 {
+    prepare(sql) {
+      const statement = { sql, values: [] }; this.statements.push(statement);
+      const prepared = {
+        bind: (...values) => { statement.values = values; return prepared; },
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "admin-1", role: "admin" } : null,
+        all: async () => sql.includes("FROM audit_logs")
+          ? { results: [{ action: "scholarship.updated", actor_email: "admin@example.test" }] }
+          : { results: [] },
+        run: async () => ({ meta: { changes: 0 } })
+      };
+      return prepared;
+    }
+  }
+  const db = new AuditDB();
+  const response = await worker.fetch(request("/api/admin/audit-logs?limit=5", {
+    headers: { cookie: "fas_session=admin-token" }
+  }), { DB: db });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).audit_logs[0].actor_email, "admin@example.test");
+  assert.deepEqual(db.statements.find(x => x.sql.includes("FROM audit_logs")).values, [6, 0]);
+});
+
+test("admin user and audit endpoints reject unauthenticated access", async () => {
+  for (const path of ["/api/admin/users", "/api/admin/audit-logs"]) {
+    const response = await worker.fetch(request(path), { DB: new MockD1() });
+    assert.equal(response.status, 403);
+  }
+});
