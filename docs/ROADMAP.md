@@ -79,7 +79,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Official source registry API foundation (manual source registration; bounded same-domain link scanning)
 - [x] Candidate review queue API foundation with duplicate URL/fingerprint checks
 - [x] Admin-only candidate review statuses and audit events
-- [ ] Curated list of official provider sources
+- [x] Document official-source acceptance, evidence and re-check policy ([source policy](SCHOLARSHIP_SOURCE_POLICY.md))
+- [ ] Owner-approved curated list of official provider sources
 - [x] Admin-triggered official-source link scan foundation (same-domain links only; no AI extraction)
 - [x] Discovery run history and scan result audit trail
 - [x] Daily scheduled checks for active registered sources (maximum five per run; human review only)
