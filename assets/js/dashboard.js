@@ -170,11 +170,13 @@
     const data = await api("/api/student/saved");
     saved = data.scholarships || [];
     renderSaved();
+    renderDeadlineWatch();
   }
   async function loadApplications() {
     const data = await api("/api/student/applications");
     applications = data.applications || [];
     renderApplications();
+    renderDeadlineWatch();
   }
   async function loadProfile() {
     const data = await api("/api/student/profile");
