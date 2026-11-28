@@ -7,6 +7,8 @@ const PAGE_SIZE=20;
 let currentOffset=0;
 let hasMore=false;
 $("year").textContent=new Date().getFullYear();
+const initialParams=new URLSearchParams(window.location.search);
+for(const key of ["q","country","level","subject","funding","deadline","eligibility"]){const value=initialParams.get(key);if(value!==null&&$(key))$(key).value=value;}
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
 function safeArray(value){try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch{return [];}}
 function render(items, rootId="results", countId="count"){
