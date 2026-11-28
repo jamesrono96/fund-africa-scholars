@@ -1,6 +1,6 @@
 # Owner decisions required before final launch work
 
-The platform can continue to be developed in GitHub. The owner has approved the membership direction below, but no payment provider, checkout, paid subscription, production service or live payment has been activated.
+The platform can continue to be developed in GitHub. The owner has approved the membership policy below, but no payment provider, checkout, paid subscription, production service or live payment has been activated.
 
 ## 1. Website domain and production hosting
 - Choose and purchase the custom domain.
@@ -15,18 +15,22 @@ The platform can continue to be developed in GitHub. The owner has approved the 
 - Email verification and password reset must be completed and tested before real student accounts are accepted.
 
 ## 3. Approved membership model
-**Owner-approved commercial direction:**
-- One-time membership fee: **USD $5**.
-- Membership duration: **lifetime** (one payment, not a recurring subscription).
-- Scholarship discovery: **free public browsing, searching and viewing**.
-- Premium features: selected student-support tools may require lifetime membership.
-- **Payments remain disabled** until the owner gives separate, explicit approval.
+**Owner-approved commercial policy:**
+- Price: **USD $5**, paid once.
+- Term: **lifetime membership**, not a recurring subscription.
+- Public access: everyone can browse, search and view scholarship details and official application links for free.
+- A paid lifetime member receives **all five premium features for life**:
+  1. Save/bookmark scholarships.
+  2. Maintain an application tracker.
+  3. Use deadline watch and reminders.
+  4. Keep private application notes.
+  5. Receive enhanced personalised recommendations.
+- The five features are included together; there are no separate premium tiers in this approved model.
+- **Payments remain disabled** until the owner gives separate, explicit approval to begin payment integration and another explicit approval to activate live payments.
 
-Recommended premium-feature boundary for product planning (not yet enforced as a paywall):
-- Free: browse/search the scholarship directory, view scholarship details and official source links.
-- Premium: save/bookmark opportunities, maintain an application tracker, use deadline watch/reminders, and keep personal application notes or enhanced personalised recommendations.
+The lifetime entitlement must be recorded server-side against the member's account after payment is independently verified by the selected provider. A browser redirect or client-side flag must never grant membership. Membership must not expire after three months; it is lifetime once validly granted.
 
-Before implementing membership enforcement or checkout, the owner must confirm the final premium feature list and the exact behaviour for existing student accounts. Before accepting money, the owner must also:
+Before accepting money, the owner must also:
 - Select a provider that supports intended African countries and payment methods, including intended mobile-money/card options.
 - Approve settlement/currency display, refunds, failed/pending payments, disputes and customer-support rules.
 - Approve provider-specific checkout, signed webhook verification, idempotency, audit logging and membership activation tests.
@@ -54,4 +58,4 @@ No payment provider or checkout should be connected, configured or activated wit
 - AI suggestions remain unverified; human approval is mandatory.
 
 ## Final approval boundary
-Production deployment, live payments, real student data collection and production secrets remain disabled until the owner explicitly approves the relevant decisions and the release gate is satisfied. The approved USD $5 lifetime model is a product decision, not permission to activate payments. Never send passwords, API tokens or payment credentials in chat or commit them to GitHub.
+Production deployment, live payments, real student data collection and production secrets remain disabled until the owner explicitly approves the relevant decisions and the release gate is satisfied. Approval of the USD $5 lifetime membership policy is not permission to activate payments. Never send passwords, API tokens or payment credentials in chat or commit them to GitHub.
