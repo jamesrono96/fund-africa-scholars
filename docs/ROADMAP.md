@@ -104,6 +104,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Enforce streaming JSON request-size limits across authentication, student, scholarship-admin and discovery APIs, including requests without Content-Length
 - [x] Add baseline API response headers for MIME sniffing, clickjacking protection, HTTPS transport and disabled unused device permissions
 - [x] Add regression tests for baseline security headers on core and delegated student API responses
+- [x] Add daily cleanup of expired authentication sessions with regression coverage
 - [x] Add regression test for oversized authentication request bodies
 - [x] Add regression tests confirming logout rejects untrusted origins and revokes the current session for the configured origin
 - [x] Document a controlled browser test plan, safe test-data rules and release blockers
