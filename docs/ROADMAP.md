@@ -67,7 +67,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Strict pagination validation and student-role denial regression tests for admin read APIs
 - [x] Document admin API access controls, fields and deliberate limitations
 - [ ] User and membership management actions (remain disabled until payment and support policies are finalized)
-- [ ] Audit log UI and review of sensitive actions
+- [x] Read-only paginated admin user directory and audit-log UI
+- [ ] Operational review of sensitive audit actions
 - [ ] Role-based access control
 - [ ] Safe handling of reported or expired opportunities
 
