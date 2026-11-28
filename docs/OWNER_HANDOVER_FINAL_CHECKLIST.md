@@ -45,7 +45,11 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 - Complete manual keyboard, screen-reader and real-device/mobile review.
 - Configure automated development backups and rehearse a restore.
 - Complete independent security review of private endpoints, CSRF/origin controls and session cookie behaviour.
-- Implement and test server-side membership entitlements only after payment integration has been separately approved.
+- Server-side premium endpoints now require a valid lifetime membership backed by a succeeded, verified USD 5 payment record.
+- A membership-status endpoint and free-student dashboard state are implemented.
+- Public scholarship browsing remains free; premium endpoints return a clear membership-required response.
+- Live payment integration, signed webhooks and membership activation remain unimplemented until separately approved.
+- Run live Worker/D1 and cross-browser tests for both unpaid and paid synthetic test accounts.
 
 ## 5. Owner actions — required before final operational setup
 ### A. Approve source registry and reviewers
@@ -108,4 +112,4 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 10. Run a final owner acceptance test before inviting real students.
 
 ## Final status
-The USD $5 lifetime membership policy and all five premium benefits are approved. Scholarship browsing remains free. The project is not fully launched; technical testing and owner-controlled provider, account, legal and deployment decisions remain. Payments remain disabled by explicit owner instruction.
+The USD $5 lifetime membership policy and all five premium benefits are approved. Scholarship browsing remains free. Server-side premium entitlement checks and free-versus-member dashboard handling have been implemented, but live development end-to-end validation is still pending. The project is not fully launched; technical testing and owner-controlled provider, account, legal and deployment decisions remain. Payments remain disabled by explicit owner instruction.
