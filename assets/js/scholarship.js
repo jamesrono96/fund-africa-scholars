@@ -21,7 +21,7 @@ async function init(){
   $("subjects").textContent=arrayText(s.subject_areas)+" · "+arrayText(s.study_levels);
   $("funding").textContent=s.funding_details||"Funding details have not been specified. Confirm directly with the provider.";
   $("source").textContent="Official source: "+s.official_url+"\nLast checked: "+(s.source_checked_at||"Not recorded")+"\nVerification status: Verified";
-  const href=safeUrl(s.official_url);if(href)$("official-link").href=href;else $("official-link").classList.add("hidden");
+  const href=safeUrl(s.official_url);if(href){$("official-link").href=href;$("official-link").classList.remove("hidden");}else $("official-link").classList.add("hidden");
   $("save-button").addEventListener("click",async()=>{try{await api("/api/student/saved",{method:"POST",body:{scholarship_id:s.id}});say("Scholarship saved to your account.");}catch(e){say(e.message+" Sign in first if you have not already.",true);}});
   $("track-button").addEventListener("click",async()=>{try{await api("/api/student/applications",{method:"POST",body:{scholarship_id:s.id}});say("Scholarship added to your application tracker.");}catch(e){say(e.message+" Sign in first if you have not already.",true);}});
  }catch(e){$("title").textContent="Scholarship unavailable";say(e.message,true);}
