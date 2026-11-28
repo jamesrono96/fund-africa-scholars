@@ -5,33 +5,36 @@
 **Environment:** Development preview only  
 **Release status:** NOT READY FOR REAL STUDENT DATA OR PRODUCTION
 
-This document separates development work already present in GitHub from actions that require the account owner, external providers, legal review or real-device testing.
-
 ## 1. Confirmed development foundation
-
 The repository contains:
-
-- Public landing page, scholarship directory and scholarship detail page.
+- Public landing page, scholarship directory and scholarship detail pages.
 - Homepage search routing to the directory with query, destination and study-level filters.
 - Student registration/login UI and Worker API foundation, password hashing and HTTP-only session-cookie foundation.
-- Student dashboard with profile, saved scholarships, application tracker, private notes and deadline watch.
+- Student dashboard with profile, saved scholarships, application tracker, notes, preferred destinations and deadline watch.
 - Admin dashboard and server-side admin API foundations for scholarship management, verification, publication, read-only users and audit logs.
 - Official scholarship-source registry and candidate discovery/review workflow. Discovery does not verify or publish scholarships automatically.
 - D1 base schema and numbered migrations.
 - GitHub Actions for validation, browser tests, CodeQL, Pages preview and development service smoke checks.
 - Draft operational, release and source-verification documentation.
 
-## 2. Latest automated checks
+## 2. Approved membership direction
+The owner has confirmed:
+- **USD $5 one-time lifetime membership.**
+- **Free scholarship browsing:** public users can browse, search and view scholarship details without paying.
+- **Premium features:** selected student-support tools will be reserved for lifetime members.
+- **Payments remain disabled** until the owner separately approves payment integration and activation.
 
-Latest reviewed GitHub Actions runs on commit `ed0c6f1`:
+Suggested premium boundary for planning (not yet an enforced paywall): saved/bookmarked scholarships, application tracking, deadline watch/reminders, private application notes and enhanced personalised recommendations. Confirm the final list and existing-account treatment before adding access enforcement.
+
+## 3. Latest automated checks
+Latest reviewed GitHub Actions runs on commit `ff879cf`:
 - Application validation: passed.
 - CodeQL security analysis: passed.
 - GitHub Pages preview: passed.
 
 Earlier validation included JavaScript syntax checks, npm audit at high severity, Worker API security smoke tests, Playwright browser tests and SQLite schema/migration integrity checks. A passing CI run is not a substitute for end-to-end tests against the live development Worker/D1 or a security audit.
 
-## 3. Development tasks still requiring work
-
+## 4. Development tasks still requiring work
 - Run the controlled manual browser test plan against the current preview.
 - Test registration, login, logout, session expiry and private student endpoints against the live development Worker/D1.
 - Test admin review, field-level evidence checks, draft conversion and publication using synthetic records.
@@ -40,10 +43,9 @@ Earlier validation included JavaScript syntax checks, npm audit at high severity
 - Complete manual keyboard, screen-reader and real-device/mobile review.
 - Configure automated development backups and rehearse a restore.
 - Complete independent security review of private endpoints, CSRF/origin controls and session cookie behaviour.
+- Design premium entitlements and test their server-side enforcement only after the owner confirms the exact feature boundary.
 
-## 4. Owner actions — required before final operational setup
-
-These cannot be safely guessed or completed without the owner's account access and explicit choices.
+## 5. Owner actions — required before final operational setup
 
 ### A. Approve source registry and reviewers
 - Review `INITIAL_OFFICIAL_SOURCE_REGISTRY.md`.
@@ -71,39 +73,38 @@ These cannot be safely guessed or completed without the owner's account access a
 - Obtain qualified review of privacy notice, terms, data retention, membership and refund terms.
 - Configure support and privacy-request contact details.
 
-### E. Confirm membership and payment policy
-- Confirm whether USD 5 lifetime membership remains the price.
-- Decide which features are public and which require membership.
-- Select a provider supporting intended countries and payment methods.
-- Approve settlement currency, refunds, failed/pending payments, disputes and support procedures.
-- Only then implement signed payment webhooks, server-side verification and idempotent membership activation.
+### E. Confirm premium entitlements and payment activation
+- Confirm the final premium feature list and treatment of existing accounts.
+- Draft and legally review membership, refund and support terms.
+- Choose a provider supporting target countries and methods only when ready.
+- Owner must separately approve payment integration before any provider or checkout is connected.
+- Test signed webhooks, idempotency and success/failure/pending/refund/dispute cases in test mode.
+- Live payment activation requires another explicit owner approval.
 
 ### F. Optional AI
 - Decide whether Workers AI should be enabled.
 - Confirm the model and private development configuration.
 - AI output remains a suggestion and cannot publish a scholarship.
 
-## 5. Recommended owner sequence after handover
+## 6. Do not do yet
+- Do not enter real student personal information into the GitHub Pages preview or development API.
+- Do not advertise candidate research documents as verified scholarships.
+- Do not accept money, activate checkout or collect membership fees.
+- Do not add payment-provider integrations or secrets before separate owner approval.
+- Do not commit production secrets to GitHub.
+- Do not deploy production or point a purchased domain at the preview until the release gate is satisfied.
 
+## 7. Recommended owner sequence after handover
 1. Review and approve the source registry and nominate reviewers.
 2. Register the owner account and securely activate administrator access.
 3. Complete synthetic-data tests of student and admin workflows.
 4. Select email provider and sender domain; complete verification/reset workflows.
 5. Choose custom domain and production hosting architecture.
 6. Obtain privacy/legal review and complete independent security review.
-7. Confirm membership access rules, payment provider and refund/dispute policy.
-8. Approve production deployment explicitly.
-9. Deploy separate production Worker and D1, configure secrets/backups/monitoring, migrate and smoke-test.
+7. Confirm the final premium feature boundary and membership terms.
+8. Approve payment integration separately when ready; keep live payments off until final approval.
+9. Approve production deployment explicitly.
 10. Run a final owner acceptance test before inviting real students.
 
-## 6. Do not do yet
-
-- Do not enter real student personal information into the GitHub Pages preview or development API.
-- Do not advertise the current candidate research documents as verified scholarships.
-- Do not accept money or enable membership/payment claims.
-- Do not add production secrets to GitHub.
-- Do not deploy production or point a purchased domain at the preview until the release gate is satisfied.
-
 ## Final status
-
-The development foundation and automated checks are in place, but the project is not fully launched. The remaining work is a mixture of additional technical testing and owner-controlled provider, account, legal and deployment decisions. Once the owner actions above are completed, the remaining release work can be performed in a controlled sequence.
+The development foundation and automated checks are in place, and the membership direction is now approved. The project is not fully launched. Remaining work includes technical testing and owner-controlled provider, account, legal and deployment decisions. Payments remain disabled by explicit owner instruction.
