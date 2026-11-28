@@ -23,7 +23,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - `directory.html` — public scholarship directory and search interface
 - `scholarship.html` — individual verified scholarship details
 - `account.html` — student sign-in and registration interface
-- `admin.html` — administrator scholarship management interface
+- `admin.html` — administrator scholarship, read-only user directory and audit-log interface
 - `assets/js/directory.js` — public scholarship search, rendering and signed-in destination recommendations
 - `assets/js/scholarship.js` — scholarship details and student save/track actions
 - `assets/js/account.js` — account page interactions and API client
