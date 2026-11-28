@@ -97,7 +97,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Server-side verification/publication gate requiring all checklist items confirmed or not applicable
 - [x] Return scholarship to needs-review/draft if a checklist item needs follow-up
 - [ ] Human approval for uncertain or changed records (operational review and testing still required)
-- [x] Student dashboard deadline watch for saved/tracked scholarships (past deadlines and deadlines within 30 days; in-dashboard only)\n- [ ] Email or push notifications for saved opportunities and approaching deadlines
+- [x] Student dashboard deadline watch for saved/tracked scholarships (past deadlines and deadlines within 30 days; in-dashboard only)
+- [ ] Email or push notifications for saved opportunities and approaching deadlines
 
 **Acceptance:** automated discovery never silently publishes an uncertain scholarship as verified.
 
