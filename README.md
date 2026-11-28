@@ -4,7 +4,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Development status
 
-**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Playwright browser tests cover account flows, directory filtering, student dashboard tracking and deadline reminders, administrator read-only user/audit views, scholarship details and mobile layouts. The latest GitHub Actions validation passed JavaScript syntax checks, high-severity npm audit, Worker API tests, 21 Playwright tests and SQLite migration/integrity checks; CodeQL analysis also passed. Live cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. The owner has approved a USD $5 one-time lifetime membership with free scholarship browsing; this approval does not authorize payment integration or activation. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
+**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Playwright browser tests cover account flows, directory filtering, student dashboard tracking and deadline reminders, administrator read-only user/audit views, scholarship details and mobile layouts. The latest GitHub Actions validation passed JavaScript syntax checks, high-severity npm audit, Worker API tests, 21 Playwright tests and SQLite migration/integrity checks; CodeQL analysis also passed. Live cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. The owner has approved a USD $5 one-time lifetime membership with free scholarship browsing and all five premium features for life; this approval does not authorize payment integration or activation. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
 
 ## Planned features
 
@@ -12,7 +12,7 @@ A scholarship discovery and student-support platform focused on helping African 
 - Scholarship detail pages with official source links and verification dates
 - Student registration, login and profile management
 - Saved scholarships and application tracking
-- Owner-approved USD $5 one-time lifetime membership plan; scholarship browsing remains free and premium entitlements are being specified (payments are not integrated or activated)
+- Owner-approved USD $5 one-time lifetime membership: free scholarship browsing plus all five premium features for life (saved scholarships, application tracker, deadline watch/reminders, private notes and enhanced personalised recommendations); payments are not integrated or activated
 - Admin dashboard for scholarships, users, memberships and moderation
 - Scholarship discovery and deadline-monitoring workflows with human review
 - Email notifications and referral features
