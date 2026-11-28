@@ -40,12 +40,17 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Saved-scholarships API with per-user ownership checks
 - [x] Application-tracker API with per-user ownership checks
 - [x] Student dashboard interface for saved opportunities, status updates and private notes
-- [ ] Server-side authorization and security review for all private endpoints
+- [x] Automated regression coverage for student premium endpoint authorization
+- [ ] Independent server-side authorization and security review for all private endpoints
 
 **Acceptance:** students can access only their own profile, saved records and application data.
 
 ## Phase 4 — Membership and payments
 
+- [x] Implement server-side lifetime entitlement checks against a verified succeeded USD 5 payment record
+- [x] Add membership-status API and free-student dashboard gating for all premium endpoints
+- [x] Add regression tests for unpaid premium reads and mutations
+- [ ] Owner separately approves payment integration
 - [ ] Confirm payment provider and supported countries/currencies
 - [ ] Create payment initiation flow on the server
 - [ ] Verify payment using provider-signed webhook or server-to-server verification
