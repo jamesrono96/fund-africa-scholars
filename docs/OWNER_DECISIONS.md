@@ -32,7 +32,7 @@ The lifetime entitlement must be recorded server-side against the member's accou
 
 Before accepting money, the owner must also:
 - Select a provider that supports intended African countries and payment methods, including intended mobile-money/card options.
-- Confirmed owner policy: no voluntary refunds; mandatory statutory consumer rights and payment-provider/card-network remedies remain unaffected. The draft is in [MEMBERSHIP_TERMS_DRAFT.md](MEMBERSHIP_TERMS_DRAFT.md) and requires local legal review.
+- **Owner-confirmed policy:** no voluntary refunds. Mandatory statutory consumer rights and payment-provider/card-network remedies remain unaffected. See [membership terms draft](MEMBERSHIP_TERMS_DRAFT.md); obtain jurisdiction-specific legal review before checkout. The draft is in [MEMBERSHIP_TERMS_DRAFT.md](MEMBERSHIP_TERMS_DRAFT.md) and requires local legal review.
 - Confirm settlement/currency display, failed/pending payments, disputes and customer-support rules.
 - Approve provider-specific checkout, signed webhook verification, idempotency, audit logging and membership activation tests.
 
