@@ -106,8 +106,10 @@ export async function handleAdmin(request, env, url) {
   if (!admin) return json({ error: "Administrator access required." }, 403);
 
   if (url.pathname === "/api/admin/users" && request.method === "GET") {
-    const limitValue = Number.parseInt(url.searchParams.get("limit") || "25", 10);
-    const offsetValue = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+    const limitRaw = url.searchParams.get("limit");
+    const offsetRaw = url.searchParams.get("offset");
+    const limitValue = limitRaw === null ? 25 : Number(limitRaw);
+    const offsetValue = offsetRaw === null ? 0 : Number(offsetRaw);
     if (!Number.isInteger(limitValue) || limitValue < 1 || limitValue > 100 ||
         !Number.isInteger(offsetValue) || offsetValue < 0 || offsetValue > 100000) {
       return json({ error: "Use a limit from 1 to 100 and a non-negative offset." }, 400);
@@ -127,8 +129,10 @@ export async function handleAdmin(request, env, url) {
   }
 
   if (url.pathname === "/api/admin/audit-logs" && request.method === "GET") {
-    const limitValue = Number.parseInt(url.searchParams.get("limit") || "50", 10);
-    const offsetValue = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+    const limitRaw = url.searchParams.get("limit");
+    const offsetRaw = url.searchParams.get("offset");
+    const limitValue = limitRaw === null ? 50 : Number(limitRaw);
+    const offsetValue = offsetRaw === null ? 0 : Number(offsetRaw);
     if (!Number.isInteger(limitValue) || limitValue < 1 || limitValue > 100 ||
         !Number.isInteger(offsetValue) || offsetValue < 0 || offsetValue > 100000) {
       return json({ error: "Use a limit from 1 to 100 and a non-negative offset." }, 400);
