@@ -303,6 +303,28 @@ test("student membership status is active only when a verified USD 5 lifetime pa
   assert.deepEqual(query.values, ["student-1"]);
 });
 
+test("unpaid student membership endpoint returns inactive lifetime entitlement", async () => {
+  class UnpaidStudentDB extends StudentMockD1 {
+    prepare(sql) {
+      const prepared = super.prepare(sql);
+      if (!sql.includes("FROM memberships m")) return prepared;
+      return {
+        bind: (...values) => { prepared.bind(...values); return {
+          first: async () => null,
+          all: prepared.all,
+          run: prepared.run
+        }; }
+      };
+    }
+  }
+  const response = await worker.fetch(studentRequest("/api/student/membership", "GET"), {
+    DB: new UnpaidStudentDB(), APP_ORIGIN: "https://app.example.test"
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.deepEqual(data.membership, { active: false, type: null, starts_at: null });
+});
+
 test("unpaid students cannot access premium endpoints", async () => {
   class UnpaidStudentDB extends StudentMockD1 {
     prepare(sql) {
