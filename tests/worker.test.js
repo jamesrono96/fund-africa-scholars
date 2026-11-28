@@ -580,6 +580,7 @@ test("admin user directory is authenticated, paginated and includes membership s
   const data = await response.json();
   assert.equal(data.users[0].email, "student@example.test");
   assert.equal(data.users[0].membership_status, null);
+  for (const field of ["password_hash", "token_hash", "session_token", "payment_payload"]) assert.equal(Object.hasOwn(data.users[0], field), false);
   assert.deepEqual(db.statements.find(x => x.sql.includes("LEFT JOIN memberships")).values, [11, 20]);
 });
 
