@@ -22,7 +22,9 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [ ] Reconfigure APP_ORIGIN, CORS, cookie policy and CSRF protections for the final domain; test sign-in/session persistence in Chrome, Firefox, Safari and mobile browsers
 - [ ] Review CodeQL and Dependabot findings and complete independent security/dependency review
 - [ ] Complete accessibility and mobile-device review
-- [ ] Write and obtain owner/legal review of privacy notice, terms, data-retention policy, refund policy and membership terms
+- [ ] Publish privacy notice, terms and data-retention policy after legal review
+- [x] Record owner policy of no voluntary membership refunds, preserving mandatory statutory rights and payment-provider remedies
+- [ ] Obtain jurisdiction-specific legal review of [membership terms draft](MEMBERSHIP_TERMS_DRAFT.md), including no-refund wording, before checkout
 - [ ] Configure automated database backups, retention, monitoring and incident-response contacts; rehearse a restore using [the operations runbook](OPERATIONS_RUNBOOK.md)
 - [ ] Owner approves the initial official source list and review cadence ([source policy](SCHOLARSHIP_SOURCE_POLICY.md))
 - [ ] Populate the directory only with genuine opportunities checked against official sources
@@ -43,12 +45,13 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [x] Keep public scholarship browsing and official links accessible without membership
 - [x] Add regression tests for free-account and lifetime-member states, including blocked unpaid reads and mutations
 - [ ] Complete live development Worker/D1 and cross-browser testing of premium gating
-- [ ] Publish clear membership, cancellation/refund and support terms after legal review
+- [ ] Publish clear membership, no-voluntary-refund and support terms after legal review
 
 ## Decisions required before payments (payments are currently OFF)
 - [ ] Owner gives separate explicit approval to begin payment integration
 - [ ] Select a payment provider that supports the intended customer countries and payment methods
-- [ ] Confirm currency display, settlement currency, refunds, disputes and support process
+- [x] Record no-voluntary-refund owner policy, subject to non-waivable legal rights
+- [ ] Confirm currency display, settlement currency, disputes and support process
 - [ ] Implement provider-side payment verification, signed webhooks, idempotency and audit logging
 - [ ] Test successful, failed, pending, duplicate, refunded and disputed payment scenarios in provider test mode
 - [ ] Owner explicitly approves live payment activation after test-mode acceptance
