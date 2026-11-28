@@ -137,7 +137,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [ ] Complete manual accessibility and real-device/mobile review after automated responsive checks
 - [x] Draft backup, recovery and incident-response runbook
 - [ ] Configure automated backups, retention, monitoring and perform a restore rehearsal
-- [ ] Privacy policy, terms and membership/refund terms
+- [x] Record owner policy: no voluntary membership refunds, subject to non-waivable statutory rights and provider remedies
+- [ ] Legal review and publication of privacy policy, terms and membership/no-voluntary-refund terms
 - [ ] Production configuration review
 - [ ] Owner approval before deployment
 
@@ -146,7 +147,7 @@ See [OWNER_DECISIONS.md](OWNER_DECISIONS.md) for the specific owner inputs and a
 - Payment provider (must support the target countries and the chosen payment methods)
 - Email delivery provider
 - Custom domain decision (needed to place website and API on the same site for reliable browser session cookies)
-- Final membership access rules and refund policy
+- Jurisdiction-specific review of membership terms and no-voluntary-refund policy
 - Whether scholarship browsing is public or some features require membership
 - Domain and production hosting configuration
 
