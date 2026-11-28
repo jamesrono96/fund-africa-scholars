@@ -42,7 +42,9 @@ A scholarship discovery and student-support platform focused on helping African 
 - `db/migrations/0007_scholarship_verification_checklist.sql` — evidence-backed scholarship-level verification checklist
 - `db/migrations/0008_field_review_follow_up.sql` — preserves field-review history and adds needs-follow-up decisions
 - `docs/ADMIN_SETUP.md` — secure admin setup instructions
-- `.github/workflows/validate.yml` — GitHub Actions JavaScript syntax and SQLite migration checks
+- `.github/workflows/validate.yml` — GitHub Actions JavaScript syntax, Worker API tests, browser tests and SQLite migration checks
+- `.github/workflows/codeql.yml` — scheduled CodeQL security analysis
+- `.github/dependabot.yml` — weekly dependency and GitHub Actions update checks
 - `wrangler.toml` — development Worker and D1 binding configuration
 - `docs/ROADMAP.md` — build sequence and completion criteria
 
@@ -58,7 +60,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 The GitHub Pages preview uses the Cloudflare development Worker at `https://fund-africa-scholars-api.jamesrono96.workers.dev` and the configured D1 database. The base schema and numbered migrations were successfully applied in the development database, and the development Worker deployment workflow has succeeded. Browser-level end-to-end testing and cross-site session-cookie validation remain outstanding. Payment processing and production deployment are not enabled.
 
-Run browser tests with `npm run test:e2e`. See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence and [the controlled browser testing guide](docs/DEVELOPMENT_TESTING.md) for live development test procedures and release blockers. See [the release gate](docs/RELEASE_GATE.md) for the remaining owner decisions and launch requirements.
+Run browser tests with `npm run test:e2e`. See [the roadmap](docs/ROADMAP.md) for the planned implementation sequence and [the controlled browser testing guide](docs/DEVELOPMENT_TESTING.md) for live development test procedures and release blockers. See [the release gate](docs/RELEASE_GATE.md) for the remaining owner decisions and launch requirements. The draft [operations runbook](docs/OPERATIONS_RUNBOOK.md) describes the backup, recovery and incident-response work that must be configured before production.
 
 
 ## Scholarship discovery foundation
