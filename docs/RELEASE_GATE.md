@@ -38,7 +38,10 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
   3. Deadline watch and reminders
   4. Private application notes
   5. Enhanced personalised recommendations
-- [ ] Implement and test server-side premium entitlement checks after payment integration is separately approved
+- [x] Implement server-side premium entitlement checks against a verified USD $5 succeeded lifetime payment record (payment integration is still absent)
+- [x] Add a student membership-status API and dashboard messaging for free versus lifetime-member accounts
+- [x] Keep public scholarship browsing and official links accessible without membership
+- [ ] Complete live development Worker/D1 and cross-browser testing of premium gating
 - [ ] Publish clear membership, cancellation/refund and support terms after legal review
 
 ## Decisions required before payments (payments are currently OFF)
@@ -58,4 +61,4 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [ ] Final owner acceptance test is completed
 
 ## Current restrictions
-Payments are not integrated or activated. Do not add a payment provider, checkout, live payment credentials or membership activation workflow until the owner separately approves that work. Production hosting and production data collection are not enabled. The GitHub Pages preview and development Worker are not approved for real student personal information. Automated scholarship discovery produces review candidates only and never verifies or publishes an opportunity by itself.
+Payments are not integrated or activated. The premium API gate is implemented, but no user can obtain a paid membership through the website yet. Do not add a payment provider, checkout, live payment credentials or payment webhook/membership activation workflow until the owner separately approves that work. Production hosting and production data collection are not enabled. The GitHub Pages preview and development Worker are not approved for real student personal information. Automated scholarship discovery produces review candidates only and never verifies or publishes an opportunity by itself.
