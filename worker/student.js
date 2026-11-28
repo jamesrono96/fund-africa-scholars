@@ -24,6 +24,32 @@ async function sha256(value) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
+
+async function lifetimeMembership(db, userId) {
+  const membership = await db.prepare(`
+    SELECT m.id, m.starts_at
+    FROM memberships m
+    JOIN payments p ON p.id = m.payment_id AND p.user_id = m.user_id
+    WHERE m.user_id = ?
+      AND m.membership_type = 'lifetime'
+      AND m.status = 'active'
+      AND m.ends_at IS NULL
+      AND p.status = 'succeeded'
+      AND p.verified_at IS NOT NULL
+      AND p.amount_minor = 500
+      AND p.currency = 'USD'
+    LIMIT 1
+  `).bind(userId).first();
+  return membership ? { active: true, type: "lifetime", starts_at: membership.starts_at } : { active: false, type: null, starts_at: null };
+}
+function membershipRequired() {
+  return json({
+    error: "This is a premium feature. A verified USD $5 lifetime membership is required. Payment activation is not available yet.",
+    code: "PREMIUM_MEMBERSHIP_REQUIRED",
+    price: { amount_minor: 500, currency: "USD", term: "lifetime" }
+  }, 402);
+}
+
 async function signedInUser(request, db) {
   const token = cookieValue(request);
   if (!token || token.length > 128) return null;
@@ -74,6 +100,19 @@ export async function handleStudent(request, env, url) {
 
   if (request.method !== "GET" && !allowedOrigin(request, env)) {
     return json({ error: "Request origin is not allowed." }, 403);
+  }
+
+  if (url.pathname === "/api/student/membership" && request.method === "GET") {
+    return json({ membership: await lifetimeMembership(env.DB, user.id),
+      premium_features: ["saved_scholarships", "application_tracker", "deadline_watch", "private_application_notes", "personalised_recommendations"] });
+  }
+
+  const premiumRoute = url.pathname === "/api/student/recommendations" ||
+    url.pathname === "/api/student/saved" || url.pathname.startsWith("/api/student/saved/") ||
+    url.pathname === "/api/student/applications" || url.pathname.startsWith("/api/student/applications/");
+  if (premiumRoute) {
+    const membership = await lifetimeMembership(env.DB, user.id);
+    if (!membership.active) return membershipRequired();
   }
 
   if (url.pathname === "/api/student/profile" && request.method === "GET") {
