@@ -25,7 +25,7 @@ test.describe("responsive page smoke checks", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/account.html", { waitUntil: "domcontentloaded" });
     await expect(page.getByLabel("Email address").first()).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(page.locator("#auth-message")).toHaveAttribute("aria-live", "polite");
   });
 
