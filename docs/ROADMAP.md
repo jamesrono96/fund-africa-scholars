@@ -125,6 +125,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
 - [x] Add scheduled CodeQL security analysis workflow (execution/results still require review)
 - [x] Configure weekly Dependabot checks for npm and GitHub Actions dependencies
+- [x] Add a high-severity npm dependency audit step to CI (results pending on the latest workflow run)
 - [ ] Independent security review and dependency-alert remediation
 - [ ] Complete manual accessibility and real-device/mobile review after automated responsive checks
 - [x] Draft backup, recovery and incident-response runbook
