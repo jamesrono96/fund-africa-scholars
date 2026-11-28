@@ -267,6 +267,8 @@ test("admin dashboard loads mocked records and discovery metrics without publish
     calls.push({ path: url.pathname, method: route.request().method() });
     const responses = {
       "/api/admin/scholarships": { scholarships: [] },
+      "/api/admin/users": { users: [{ full_name: "Test Student", email: "student@example.test", country_of_residence: "Somalia", role: "student", email_verified_at: null, membership_status: null, created_at: "2026-11-01" }], count: 1, has_more: false },
+      "/api/admin/audit-logs": { audit_logs: [{ id: "audit-1", action: "scholarship.updated", target_type: "scholarship", target_id: "scholarship-1", actor_email: "admin@example.test", actor_name: "Test Admin", details_json: "{\\"changed_fields\\":[\\"deadline\\"]}", created_at: "2026-11-02" }], count: 1, has_more: false },
       "/api/admin/discovery/sources": { sources: [] },
       "/api/admin/discovery/candidates": { candidates: [] },
       "/api/admin/discovery/runs": { runs: [] },
@@ -292,10 +294,16 @@ test("admin dashboard loads mocked records and discovery metrics without publish
   await expect(page.locator("#source-message")).toContainText("0 source(s) registered");
   await expect(page.locator("#candidate-message")).toContainText("0 candidate(s) loaded");
   await expect(page.locator("#summary-message")).toContainText("Discovery metrics refreshed");
+  await expect(page.locator("#admin-users")).toContainText("student@example.test");
+  await expect(page.locator("#admin-users")).toContainText("Not verified");
+  await expect(page.locator("#admin-audit")).toContainText("scholarship.updated");
+  await expect(page.locator("#admin-audit")).toContainText("admin@example.test");
   await expect(page.locator("#discovery-summary")).toContainText("Pending: 2");
   await expect(page.locator("#discovery-summary")).toContainText("Approved: 3");
   expect(calls.some(call => call.path === "/api/admin/scholarships" && call.method === "GET")).toBeTruthy();
   expect(calls.some(call => call.path === "/api/admin/discovery/summary" && call.method === "GET")).toBeTruthy();
+  expect(calls.some(call => call.path === "/api/admin/users" && call.method === "GET")).toBeTruthy();
+  expect(calls.some(call => call.path === "/api/admin/audit-logs" && call.method === "GET")).toBeTruthy();
   expect(calls.some(call => call.method === "POST" || call.method === "PATCH" || call.method === "DELETE")).toBeFalsy();
 
   await page.locator("#logout-button").click();
