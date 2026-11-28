@@ -22,10 +22,10 @@ This checklist is the final boundary between the private development preview and
 - [ ] Configure the sender domain and verify SPF, DKIM and DMARC with the selected provider
 - [ ] Choose and purchase the custom domain; place the website and API under the same registrable domain to avoid third-party-cookie restrictions
 - [ ] Reconfigure APP_ORIGIN, CORS, cookie policy and CSRF protections for the final domain; test sign-in/session persistence in Chrome, Firefox, Safari and mobile browsers
-- [ ] Complete independent security and dependency review
+- [ ] Review CodeQL and Dependabot findings and complete independent security/dependency review
 - [ ] Complete accessibility and mobile-device review
 - [ ] Write and obtain owner/legal review of privacy notice, terms, data-retention policy, refund policy and membership terms
-- [ ] Establish database backups, restoration test, monitoring and incident-response process
+- [ ] Configure automated database backups, retention, monitoring and incident-response contacts; rehearse a restore using [the operations runbook](OPERATIONS_RUNBOOK.md)
 - [ ] Populate the directory only with genuine opportunities checked against official sources
 - [ ] Confirm the owner administrator account is securely promoted in the private development database and review the admin workflow
 - [ ] Test student and administrator workflows with synthetic accounts and records only, including the new admin read-only tables and deadline watch, including the new admin read-only tables and deadline watch
