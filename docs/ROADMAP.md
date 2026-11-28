@@ -62,7 +62,8 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Admin-only create, edit, archive and review API foundations
 - [x] Verification required before publication
 - [x] Admin action audit-log foundation
-- [x] Configure development database; [ ] securely promote the owner's admin account
+- [x] Configure development database
+- [ ] Securely promote the owner's admin account
 - [x] Read-only admin user directory with membership status and bounded pagination
 - [x] Read-only admin audit-log viewer API with actor context and bounded pagination
 - [x] Strict pagination validation and student-role denial regression tests for admin read APIs
@@ -82,6 +83,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Admin-only candidate review statuses and audit events
 - [x] Document official-source acceptance, evidence and re-check policy ([source policy](SCHOLARSHIP_SOURCE_POLICY.md))
 - [ ] Owner-approved curated list of official provider sources
+- [x] Prepare initial official-source scholarship research queues for Australia and other priority destinations (candidates only; not verified or published)
 - [x] Admin-triggered official-source link scan foundation (same-domain links only; no AI extraction)
 - [x] Discovery run history and scan result audit trail
 - [x] Daily scheduled checks for active registered sources (maximum five per run; human review only)
@@ -123,9 +125,9 @@ The repository remains the development workspace. The development Worker and D1 
 - [x] Publish a manual browser smoke-test guide for public, student and admin flows
 - [x] Add scheduled GitHub Actions smoke checks for the public website, API health, CORS and public scholarship endpoint
 - [ ] Validate cross-site session cookies in supported browsers (GitHub Pages and workers.dev are different sites)
-- [x] Add scheduled CodeQL security analysis workflow (execution/results still require review)
+- [x] Add scheduled CodeQL security analysis workflow (latest run passed; future findings still require review)
 - [x] Configure weekly Dependabot checks for npm and GitHub Actions dependencies
-- [x] Add a high-severity npm dependency audit step to CI (results pending on the latest workflow run)
+- [x] Add a high-severity npm dependency audit step to CI (latest validation run passed)
 - [ ] Independent security review and dependency-alert remediation
 - [ ] Complete manual accessibility and real-device/mobile review after automated responsive checks
 - [x] Draft backup, recovery and incident-response runbook
