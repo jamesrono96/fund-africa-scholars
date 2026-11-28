@@ -63,7 +63,7 @@ Run browser tests with `npm run test:e2e`. See [the roadmap](docs/ROADMAP.md) fo
 
 ## Scholarship discovery foundation
 
-The admin API includes a manual official-source registry and a candidate review queue. The development D1 schema and numbered migrations through `0008_field_review_follow_up.sql` have been applied successfully. Do not rerun the one-time schema workflow against this database. Discovery candidates are never published automatically; an administrator must verify and separately create/publish a scholarship. Daily scheduled checks are configured for active registered sources. They queue candidates for human review only and never verify or publish records automatically. AI extraction remains optional and requires a configured Workers AI binding. Email notifications are not implemented yet.
+The admin API includes a manual official-source registry and a candidate review queue. The development D1 schema and numbered migrations through `0008_field_review_follow_up.sql` have been applied successfully. Do not rerun the one-time schema workflow against this database. Discovery candidates are never published automatically; an administrator must verify and separately create/publish a scholarship. Daily scheduled checks are configured for active registered sources. They queue candidates for human review only and never verify or publish records automatically. AI extraction remains optional and requires a configured Workers AI binding. Email and push notifications are not implemented; the student dashboard currently provides an in-dashboard deadline watch for saved and tracked scholarships.
 
 
 ### Manual source checks
