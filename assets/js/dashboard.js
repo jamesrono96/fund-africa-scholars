@@ -45,6 +45,39 @@
       return link;
     } catch { return null; }
   }
+  function renderDeadlineWatch() {
+    const root = $("deadline-list");
+    if (!root) return;
+    root.replaceChildren();
+    const byId = new Map();
+    for (const item of [...saved, ...applications]) {
+      const id = item.scholarship_id || item.id;
+      if (id && item.application_deadline) byId.set(id, item);
+    }
+    const today = new Date();
+    const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const entries = [...byId.values()].map(item => {
+      const raw = String(item.application_deadline || "");
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return null;
+      const parts = raw.split("-").map(Number);
+      const dueUtc = Date.UTC(parts[0], parts[1] - 1, parts[2]);
+      const valid = new Date(dueUtc).toISOString().slice(0, 10) === raw;
+      if (!valid) return null;
+      return { item, days: Math.round((dueUtc - todayUtc) / 86400000) };
+    }).filter(entry => entry && entry.days <= 30).sort((a,b) => a.days - b.days);
+    if (!entries.length) {
+      root.append(node("p", "empty", "No saved or tracked scholarships have a published deadline within the next 30 days or in the past."));
+      return;
+    }
+    for (const entry of entries) {
+      const card = node("article", "item");
+      const label = entry.days < 0 ? "Deadline passed " + Math.abs(entry.days) + " day(s) ago" : entry.days === 0 ? "Deadline is today" : entry.days + " day(s) remaining";
+      card.append(node("h3", "", entry.item.title), node("div", "meta", entry.item.provider + " · " + entry.item.destination_country + " · " + safeDate(entry.item.application_deadline)), node("strong", entry.days <= 7 ? "error" : "meta", label));
+      const link = officialLink(entry.item.official_url);
+      if (link) card.append(link);
+      root.append(card);
+    }
+  }
   function renderSaved() {
     const root = $("saved-list");
     root.replaceChildren();
