@@ -26,6 +26,7 @@ This checklist is the final boundary between the private development preview and
 - [ ] Complete accessibility and mobile-device review
 - [ ] Write and obtain owner/legal review of privacy notice, terms, data-retention policy, refund policy and membership terms
 - [ ] Configure automated database backups, retention, monitoring and incident-response contacts; rehearse a restore using [the operations runbook](OPERATIONS_RUNBOOK.md)
+- [ ] Owner approves the initial official source list and review cadence ([source policy](SCHOLARSHIP_SOURCE_POLICY.md))
 - [ ] Populate the directory only with genuine opportunities checked against official sources
 - [ ] Confirm the owner administrator account is securely promoted in the private development database and review the admin workflow
 - [ ] Test student and administrator workflows with synthetic accounts and records only, including the new admin read-only tables and deadline watch, including the new admin read-only tables and deadline watch
