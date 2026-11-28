@@ -131,7 +131,7 @@ The repository remains the development workspace. The development Worker and D1 
 - [ ] Production configuration review
 - [ ] Owner approval before deployment
 
-## Decisions still required
+See [OWNER_DECISIONS.md](OWNER_DECISIONS.md) for the specific owner inputs and approvals needed.\n\n## Decisions still required
 
 - Payment provider (must support the target countries and the chosen payment methods)
 - Email delivery provider
