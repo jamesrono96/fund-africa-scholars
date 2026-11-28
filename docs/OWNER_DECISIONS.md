@@ -32,7 +32,8 @@ The lifetime entitlement must be recorded server-side against the member's accou
 
 Before accepting money, the owner must also:
 - Select a provider that supports intended African countries and payment methods, including intended mobile-money/card options.
-- Approve settlement/currency display, refunds, failed/pending payments, disputes and customer-support rules.
+- Confirmed owner policy: no voluntary refunds; mandatory statutory consumer rights and payment-provider/card-network remedies remain unaffected. The draft is in [MEMBERSHIP_TERMS_DRAFT.md](MEMBERSHIP_TERMS_DRAFT.md) and requires local legal review.
+- Confirm settlement/currency display, failed/pending payments, disputes and customer-support rules.
 - Approve provider-specific checkout, signed webhook verification, idempotency, audit logging and membership activation tests.
 
 No payment provider or checkout should be connected, configured or activated without that separate approval.
@@ -44,7 +45,7 @@ No payment provider or checkout should be connected, configured or activated wit
 
 ## 5. Legal and privacy review
 - Confirm the country/jurisdiction of the platform operator and the main countries in which it will actively serve students.
-- Obtain qualified review of the privacy notice, terms, data-retention policy, membership terms and refund policy.
+- Obtain qualified review of the privacy notice, terms, data-retention policy, membership terms and no-voluntary-refund membership policy and mandatory consumer-rights wording.
 - Confirm the contact address for privacy requests and customer support.
 
 ## 6. Scholarship source priorities
