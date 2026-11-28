@@ -30,9 +30,15 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [ ] Test student and administrator workflows with synthetic accounts and records only, including the new admin read-only tables and deadline watch
 
 ## Approved membership policy
-- [x] One-time USD $5 lifetime membership direction approved by owner
-- [x] Scholarship browsing/searching and scholarship detail pages remain free
-- [ ] Owner confirms the exact premium feature list and grandfathering rules before access controls are enforced
+- [x] USD $5 one-time payment grants lifetime membership (not recurring and not three-month expiry)
+- [x] Public scholarship browsing, searching, detail pages and official application links remain free
+- [x] All five premium features are included together for lifetime members:
+  1. Save/bookmark scholarships
+  2. Application tracker
+  3. Deadline watch and reminders
+  4. Private application notes
+  5. Enhanced personalised recommendations
+- [ ] Implement and test server-side premium entitlement checks after payment integration is separately approved
 - [ ] Publish clear membership, cancellation/refund and support terms after legal review
 
 ## Decisions required before payments (payments are currently OFF)
