@@ -41,6 +41,7 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [x] Implement server-side premium entitlement checks against a verified USD $5 succeeded lifetime payment record (payment integration is still absent)
 - [x] Add a student membership-status API and dashboard messaging for free versus lifetime-member accounts
 - [x] Keep public scholarship browsing and official links accessible without membership
+- [x] Add regression tests for free-account and lifetime-member states, including blocked unpaid reads and mutations
 - [ ] Complete live development Worker/D1 and cross-browser testing of premium gating
 - [ ] Publish clear membership, cancellation/refund and support terms after legal review
 
