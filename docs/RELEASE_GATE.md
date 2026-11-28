@@ -8,7 +8,6 @@ This checklist is the final boundary between the private development preview and
 - Student account, profile, saved opportunities and application tracker
 - Admin scholarship management and evidence-based verification gate
 - Read-only paginated student-account directory and administrator audit-log viewer
-- Read-only paginated student-account directory and administrator audit-log viewer
 - Official-source discovery queue with human approval; no automatic publishing
 - Development Worker and D1 schema/migrations
 - JavaScript, API-security and SQLite migration checks in GitHub Actions
@@ -31,7 +30,7 @@ Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
 - [ ] Owner approves the initial official source list and review cadence ([source policy](SCHOLARSHIP_SOURCE_POLICY.md))
 - [ ] Populate the directory only with genuine opportunities checked against official sources
 - [ ] Confirm the owner administrator account is securely promoted in the private development database and review the admin workflow
-- [ ] Test student and administrator workflows with synthetic accounts and records only, including the new admin read-only tables and deadline watch, including the new admin read-only tables and deadline watch
+- [ ] Test student and administrator workflows with synthetic accounts and records only, including the new admin read-only tables and deadline watch
 
 ## Decisions required before payments
 
