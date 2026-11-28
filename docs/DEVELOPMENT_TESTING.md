@@ -46,7 +46,7 @@ Run these checks in the latest Chrome, Firefox and Edge where available. Repeat 
 
 ## API and security checks
 
-The automated Node test suite covers authentication origin checks, private endpoint authentication, per-user ownership, scholarship publication gates, evidence validation, bounded JSON bodies and logout origin validation.
+The automated Node test suite covers authentication origin checks, private endpoint authentication, per-user ownership, scholarship publication gates, evidence validation, bounded JSON bodies, logout origin validation, lifetime membership entitlement checks and blocked unpaid premium reads/mutations.
 
 The scheduled development smoke workflow checks the static homepage, Worker health endpoint, CORS origin and public scholarship API shape. These checks do not prove that browser cookies work across GitHub Pages and workers.dev.
 
