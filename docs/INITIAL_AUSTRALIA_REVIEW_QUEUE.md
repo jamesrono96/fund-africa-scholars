@@ -83,3 +83,21 @@ Do not import or publish any candidate from this file solely because it appears 
 7. Save evidence URLs and reviewer notes in the platform's verification checklist, then mark verified and published only after all required checks are complete.
 
 **Student-facing accuracy rule:** A tuition fee reduction must never be labelled “fully funded”. Admission to a degree and scholarship eligibility are separate decisions. Students must confirm current terms with the provider.
+
+
+## Candidate 4 — UQ International Excellence Scholarship
+
+- Provider: The University of Queensland
+- Official scholarship page: https://scholarships.uq.edu.au/scholarship/uq-international-excellence-scholarship
+- Destination: Australia
+- Study level: Undergraduate and postgraduate coursework
+- Subject match: All study areas; Computer Science is not excluded by the published study-area summary. Confirm the exact 2027 undergraduate program and offer conditions with UQ.
+- Nationality: International students; no Africa-only nationality restriction is stated on the scholarship summary.
+- Award: 25% reduction in tuition fees per semester for the duration of the program. This is a tuition discount, not a fully funded award.
+- Commencement: Students applying to commence in 2027 in an eligible program.
+- Selection: Competitive academic score among offer holders for the commencement semester; applicants must meet program entry and English requirements and satisfy offer conditions.
+- Application route: Automatic assessment after applying for an eligible UQ program; no separate scholarship application.
+- Timing / deadline: No separate scholarship closing date is stated in the summary. Course application and offer acceptance deadlines still apply.
+- Current review state: Candidate; verify current 2027 terms, exact course eligibility, exclusions and offer conditions.
+- Evidence checked:
+  - Scholarship page: https://scholarships.uq.edu.au/scholarship/uq-international-excellence-scholarship
