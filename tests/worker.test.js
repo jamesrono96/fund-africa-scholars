@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker/index.js";
 import { runScheduledDiscovery } from "../worker/discovery.js";
+import { cleanupExpiredSessions } from "../worker/index.js";
 
 class MockD1 {
   statements = [];
@@ -530,4 +531,27 @@ test("delegated student responses retain baseline security headers", async () =>
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000");
+});
+
+
+test("scheduled maintenance removes only expired sessions", async () => {
+  const db = new MockD1();
+  db.prepare = function(sql) {
+    const statement = { sql, values: [] };
+    this.statements.push(statement);
+    const prepared = {
+      bind: (...values) => { statement.values = values; return prepared; },
+      run: async () => ({ meta: { changes: 3 } })
+    };
+    return prepared;
+  };
+  const now = new Date("2026-11-28T00:00:00.000Z");
+  const result = await cleanupExpiredSessions(db, now);
+  assert.deepEqual(result, { skipped: false, deleted: 3 });
+  assert.match(db.statements[0].sql, /^DELETE FROM sessions WHERE expires_at <= \?$/);
+  assert.deepEqual(db.statements[0].values, [now.toISOString()]);
+});
+
+test("session cleanup safely skips when D1 is unavailable", async () => {
+  assert.deepEqual(await cleanupExpiredSessions(null), { skipped: true, deleted: 0 });
 });
