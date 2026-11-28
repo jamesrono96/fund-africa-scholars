@@ -15,7 +15,9 @@ This checklist is the final boundary between the private development preview and
 - Playwright account/directory smoke tests and mobile-width responsive checks
 - Baseline API security headers
 
-Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).\n\n## Must be completed before real students use the service
+Owner confirmations are collected in [OWNER_DECISIONS.md](OWNER_DECISIONS.md).
+
+## Must be completed before real students use the service
 
 - [ ] Choose a transactional email provider and configure its API token as a Cloudflare Worker secret (never commit it)
 - [ ] Implement and test email verification and password reset end-to-end using that provider
