@@ -243,9 +243,35 @@
       const me = await api("/api/auth/me");
       $("welcome").textContent = "Welcome, " + me.user.full_name.split(" ")[0];
       $("profile-line").textContent = me.user.email + (me.user.country_of_residence ? " · " + me.user.country_of_residence : "");
-      await Promise.all([loadSaved(), loadApplications(), loadProfile()]);
-      showTab(activeTab);
-      message("Your private student workspace is ready.");
+      const [membership] = await Promise.all([api("/api/student/membership"), loadProfile()]);
+      const member = Boolean(membership.membership && membership.membership.active);
+      const banner = $("membership-panel");
+      if (banner) {
+        banner.classList.remove("hidden");
+        banner.querySelector("[data-membership-title]").textContent = member
+          ? "Lifetime membership active"
+          : "Unlock all five premium student tools";
+        banner.querySelector("[data-membership-copy]").textContent = member
+          ? "Your USD $5 lifetime membership is active. All five premium features are enabled for your account."
+          : "Scholarship browsing is free. A one-time USD $5 lifetime membership will unlock saved scholarships, application tracking, deadline watch, private notes and personalised recommendations. Payments are not available yet.";
+      }
+      if (member) {
+        await Promise.all([loadSaved(), loadApplications()]);
+        message("Your lifetime member workspace is ready.");
+      } else {
+        const locked = "This feature is included with the USD $5 lifetime membership. Payment activation is not available yet.";
+        for (const id of ["saved-list", "apps-list", "deadline-list"]) {
+          const root = $(id);
+          root.replaceChildren(node("p", "empty", locked));
+        }
+        $("saved-tab").disabled = true;
+        $("apps-tab").disabled = true;
+        $("saved-tab").setAttribute("aria-disabled", "true");
+        $("apps-tab").setAttribute("aria-disabled", "true");
+        showTab("profile");
+        message("Your profile is available. Premium tools will unlock after verified lifetime membership.", false);
+      }
+      showTab(member ? activeTab : "profile");
     } catch (error) {
       $("profile-line").textContent = "Please sign in to continue.";
       message(error.message + " Open the account page to sign in.", true);
