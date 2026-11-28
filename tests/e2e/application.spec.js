@@ -246,6 +246,42 @@ test("student can add a saved scholarship to the tracker, update it, save notes 
   expect(changes.some(change => change.method === "DELETE")).toBeTruthy();
 });
 
+test("free student can browse and manage profile but premium workspace stays locked", async ({ page }) => {
+  await page.route(`${API}/api/auth/me`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      user: { full_name: "Free Student", email: "free@example.test", country_of_residence: "Kenya" }
+    }) })
+  );
+  await page.route(`${API}/api/student/membership`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      membership: { active: false, type: null, starts_at: null },
+      premium_features: ["saved_scholarships", "application_tracker", "deadline_watch", "private_application_notes", "personalised_recommendations"]
+    }) })
+  );
+  await page.route(`${API}/api/student/profile`, route =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      profile: { full_name: "Free Student", email: "free@example.test", country_of_residence: "Kenya", preferred_destinations: [] }
+    }) })
+  );
+  const premiumCalls = [];
+  await page.route(`${API}/api/student/saved**`, route => {
+    premiumCalls.push(route.request().url());
+    return route.fulfill({ status: 402, contentType: "application/json", body: JSON.stringify({ code: "PREMIUM_MEMBERSHIP_REQUIRED", error: "Membership required." }) });
+  });
+  await page.route(`${API}/api/student/applications**`, route => {
+    premiumCalls.push(route.request().url());
+    return route.fulfill({ status: 402, contentType: "application/json", body: JSON.stringify({ code: "PREMIUM_MEMBERSHIP_REQUIRED", error: "Membership required." }) });
+  });
+
+  await page.goto("/dashboard.html");
+  await expect(page.locator("#membership-panel")).toContainText("Unlock all five premium student tools");
+  await expect(page.locator("#membership-panel")).toContainText("one-time USD $5 lifetime membership");
+  await expect(page.locator("#profile-email")).toHaveValue("free@example.test");
+  await expect(page.locator("#saved-tab")).toBeDisabled();
+  await expect(page.locator("#apps-tab")).toBeDisabled();
+  expect(premiumCalls).toHaveLength(0);
+});
+
 test("admin interface denies a signed-in student account", async ({ page }) => {
   await page.route(`${API}/api/auth/login`, route =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: { email: "student@example.test" } }) })
