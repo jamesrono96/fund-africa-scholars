@@ -30,6 +30,6 @@ section{padding:72px 0}.heading{max-width:650px;margin-bottom:30px}.kicker{font-
 <footer><div class="wrap"><div class="foot"><a class="brand" href="#"><span class="mark">F</span><span>Fund Africa Scholars</span></a><div class="footlinks"><a href="#scholarships">Scholarships</a><a href="#how">How it works</a><a href="#membership">Membership</a></div></div><div class="copy">© <span id="year"></span> Fund Africa Scholars. Always confirm scholarship details with the official provider.</div></div></footer>
 <script>
 document.getElementById('year').textContent=new Date().getFullYear();
-document.getElementById('search-form').addEventListener('submit',function(e){e.preventDefault();const q=document.getElementById('keyword').value.trim(),c=document.getElementById('country').value,l=document.getElementById('level').value;const s=[q,c,l].filter(Boolean);document.getElementById('status').textContent=s.length?'Search noted: '+s.join(' · ')+'. Verified listings will appear when the directory launches.':'The verified scholarship directory is being prepared. Please check back soon.';});
+document.getElementById('search-form').addEventListener('submit',function(e){e.preventDefault();const q=document.getElementById('keyword').value.trim(),c=document.getElementById('country').value,l=document.getElementById('level').value;const params=new URLSearchParams();if(q){params.set('q',q);params.set('subject',q);}if(c)params.set('country',c);if(l)params.set('level',l);window.location.href='directory.html'+(params.toString()?'?'+params.toString():'');});
 </script>
 </body></html>
