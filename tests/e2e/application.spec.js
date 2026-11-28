@@ -268,7 +268,7 @@ test("admin dashboard loads mocked records and discovery metrics without publish
     const responses = {
       "/api/admin/scholarships": { scholarships: [] },
       "/api/admin/users": { users: [{ full_name: "Test Student", email: "student@example.test", country_of_residence: "Somalia", role: "student", email_verified_at: null, membership_status: null, created_at: "2026-11-01" }], count: 1, has_more: false },
-      "/api/admin/audit-logs": { audit_logs: [{ id: "audit-1", action: "scholarship.updated", target_type: "scholarship", target_id: "scholarship-1", actor_email: "admin@example.test", actor_name: "Test Admin", details_json: "{\\"changed_fields\\":[\\"deadline\\"]}", created_at: "2026-11-02" }], count: 1, has_more: false },
+      "/api/admin/audit-logs": { audit_logs: [{ id: "audit-1", action: "scholarship.updated", target_type: "scholarship", target_id: "scholarship-1", actor_email: "admin@example.test", actor_name: "Test Admin", details_json: '{"changed_fields":["deadline"]}', created_at: "2026-11-02" }], count: 1, has_more: false },
       "/api/admin/discovery/sources": { sources: [] },
       "/api/admin/discovery/candidates": { candidates: [] },
       "/api/admin/discovery/runs": { runs: [] },
