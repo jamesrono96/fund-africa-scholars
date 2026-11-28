@@ -4,7 +4,7 @@ A scholarship discovery and student-support platform focused on helping African 
 
 ## Development status
 
-**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Playwright browser tests now cover account sign-in UI, API failure feedback and directory filtering with mocked API responses; live cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
+**The GitHub Pages preview, development Cloudflare Worker and development D1 schema/migrations have been deployed successfully.** The account, directory, student dashboard and admin interfaces are wired to the development API. Playwright browser tests cover account flows, directory filtering, student dashboard tracking and deadline reminders, administrator read-only user/audit views, scholarship details and mobile layouts. The latest GitHub Actions validation passed JavaScript syntax checks, high-severity npm audit, Worker API tests, 21 Playwright tests and SQLite migration/integrity checks; CodeQL analysis also passed. Live cross-site session-cookie validation and owner admin setup remain outstanding. Payment processing and production deployment are disabled. See [GitHub Pages preview instructions](docs/GITHUB_PAGES_PREVIEW.md).
 
 ## Planned features
 
