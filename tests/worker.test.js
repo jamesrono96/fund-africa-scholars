@@ -270,6 +270,9 @@ class StudentMockD1 extends MockD1 {
         };
         if (sql.includes("FROM scholarships WHERE id =")) return null;
         if (sql.includes("FROM applications WHERE id = ? AND user_id = ?")) return null;
+        if (sql.includes("FROM memberships m")) return {
+          id: "lifetime-membership-1", starts_at: "2026-11-28 00:00:00"
+        };
         return null;
       },
       all: async () => ({ results: [] }),
@@ -278,6 +281,76 @@ class StudentMockD1 extends MockD1 {
     return prepared;
   }
 }
+
+test("student membership status is active only when a verified USD 5 lifetime payment exists", async () => {
+  const db = new StudentMockD1();
+  const response = await worker.fetch(studentRequest("/api/student/membership", "GET"), {
+    DB: db, APP_ORIGIN: "https://app.example.test"
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.membership.active, true);
+  assert.equal(data.membership.type, "lifetime");
+  assert.deepEqual(data.premium_features, [
+    "saved_scholarships", "application_tracker", "deadline_watch",
+    "private_application_notes", "personalised_recommendations"
+  ]);
+  const query = db.statements.find(item => item.sql.includes("FROM memberships m"));
+  assert.ok(query.sql.includes("p.status = 'succeeded'"));
+  assert.ok(query.sql.includes("p.verified_at IS NOT NULL"));
+  assert.ok(query.sql.includes("p.amount_minor = 500"));
+  assert.ok(query.sql.includes("p.currency = 'USD'"));
+  assert.deepEqual(query.values, ["student-1"]);
+});
+
+test("unpaid students cannot access premium endpoints", async () => {
+  class UnpaidStudentDB extends StudentMockD1 {
+    prepare(sql) {
+      const prepared = super.prepare(sql);
+      if (!sql.includes("FROM memberships m")) return prepared;
+      return {
+        bind: (...values) => { prepared.bind(...values); return {
+          first: async () => null,
+          all: prepared.all,
+          run: prepared.run
+        }; }
+      };
+    }
+  }
+  for (const path of [
+    "/api/student/recommendations", "/api/student/saved",
+    "/api/student/applications"
+  ]) {
+    const db = new UnpaidStudentDB();
+    const response = await worker.fetch(studentRequest(path, "GET"), {
+      DB: db, APP_ORIGIN: "https://app.example.test"
+    });
+    assert.equal(response.status, 402, path);
+    const data = await response.json();
+    assert.equal(data.code, "PREMIUM_MEMBERSHIP_REQUIRED");
+    assert.deepEqual(data.price, { amount_minor: 500, currency: "USD", term: "lifetime" });
+  }
+});
+
+test("student profile remains available without premium membership", async () => {
+  class UnpaidStudentDB extends StudentMockD1 {
+    prepare(sql) {
+      const prepared = super.prepare(sql);
+      if (!sql.includes("FROM memberships m")) return prepared;
+      return {
+        bind: (...values) => { prepared.bind(...values); return {
+          first: async () => null,
+          all: prepared.all,
+          run: prepared.run
+        }; }
+      };
+    }
+  }
+  const response = await worker.fetch(studentRequest("/api/student/profile", "GET"), {
+    DB: new UnpaidStudentDB(), APP_ORIGIN: "https://app.example.test"
+  });
+  assert.equal(response.status, 200);
+});
 
 test("students cannot save a scholarship that is not verified and published", async () => {
   const db = new StudentMockD1();
