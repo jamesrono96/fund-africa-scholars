@@ -6,7 +6,7 @@
 **Release status:** NOT READY FOR REAL STUDENT DATA OR PRODUCTION
 
 ## 1. Confirmed development foundation
-The repository contains:
+The latest confirmed repository head at handover preparation is `6224cc0` (28 November 2026). The repository contains:
 - Public landing page, scholarship directory and scholarship detail pages.
 - Homepage search routing to the directory with query, destination and study-level filters.
 - Student registration/login UI and Worker API foundation, password hashing and HTTP-only session-cookie foundation.
@@ -32,7 +32,7 @@ The repository contains:
 Membership entitlements must be enforced server-side after independently verified payment. No client-side switch, redirect or editable browser value may grant paid access.
 
 ## 3. Latest automated checks
-On commit `d6c2c5b`, the GitHub Actions application validation completed successfully, including JavaScript syntax, high-severity dependency audit, Worker API security tests, Playwright browser end-to-end tests and SQLite schema/migration integrity checks. CodeQL also completed successfully. The GitHub Pages preview workflow was still pending at the last status check.
+On commit `6224cc0`, GitHub Actions completed successfully: application validation (including JavaScript syntax, high-severity dependency audit, Worker API security tests, Playwright browser end-to-end tests and SQLite schema/migration integrity checks), CodeQL security analysis and the GitHub Pages preview build. These checks validate the development code and preview build, not production readiness or live cross-site session behavior.
 
 These are automated CI checks against test fixtures and a local SQLite validation database. They do not substitute for live end-to-end tests against the development Worker/D1, cross-browser cookie/session testing or an independent security review.
 
