@@ -5,6 +5,46 @@ const API_BASE=window.FAS_API_BASE||"https://fund-africa-scholars-api.jamesrono9
 const $=id=>document.getElementById(id);
 const loginPanel=$("login-panel"),adminPanel=$("admin-panel"),form=$("scholarship-form");
 let records=[];
+let usersOffset=0,auditOffset=0;
+const pageSize=25;
+function renderUsers(data){
+ const body=$("admin-users");body.replaceChildren();
+ for(const u of data.users||[]){
+  const tr=document.createElement("tr");
+  tr.append(cell((u.full_name||"Unnamed student")+" · "+u.email),cell(u.country_of_residence),cell(u.role),cell(u.email_verified_at?"Verified":"Not verified"),cell(u.membership_status?(u.membership_type+" · "+u.membership_status):"No membership"),cell(u.created_at));
+  body.append(tr);
+ }
+ if(!body.children.length){const tr=document.createElement("tr"),td=cell("No student accounts found.");td.colSpan=6;tr.append(td);body.append(tr);}
+ $("users-previous").disabled=usersOffset===0;$("users-next").disabled=!data.has_more;
+ msg("users-message",(data.count||0)+" account(s) shown · offset "+usersOffset+".");
+}
+async function loadUsers(){
+ try{const data=await api("/api/admin/users?limit="+pageSize+"&offset="+usersOffset);renderUsers(data);}
+ catch(error){msg("users-message",error.message,"error");}
+}
+function renderAudit(data){
+ const body=$("admin-audit");body.replaceChildren();
+ for(const a of data.audit_logs||[]){
+  let details="";try{details=JSON.stringify(JSON.parse(a.details_json||"{}"));}catch{details="Details unavailable";}
+  const tr=document.createElement("tr");
+  tr.append(cell(a.created_at),cell(a.actor_name?(a.actor_name+" · "+a.actor_email):a.actor_email),cell(a.action),cell((a.target_type||"")+" · "+(a.target_id||"")),cell(details));
+  body.append(tr);
+ }
+ if(!body.children.length){const tr=document.createElement("tr"),td=cell("No audit events found.");td.colSpan=5;tr.append(td);body.append(tr);}
+ $("audit-previous").disabled=auditOffset===0;$("audit-next").disabled=!data.has_more;
+ msg("audit-message",(data.count||0)+" event(s) shown · offset "+auditOffset+".");
+}
+async function loadAudit(){
+ try{const data=await api("/api/admin/audit-logs?limit="+pageSize+"&offset="+auditOffset);renderAudit(data);}
+ catch(error){msg("audit-message",error.message,"error");}
+}
+$("users-refresh").addEventListener("click",()=>{usersOffset=0;loadUsers();});
+$("users-previous").addEventListener("click",()=>{usersOffset=Math.max(0,usersOffset-pageSize);loadUsers();});
+$("users-next").addEventListener("click",()=>{usersOffset+=pageSize;loadUsers();});
+$("audit-refresh").addEventListener("click",()=>{auditOffset=0;loadAudit();});
+$("audit-previous").addEventListener("click",()=>{auditOffset=Math.max(0,auditOffset-pageSize);loadAudit();});
+$("audit-next").addEventListener("click",()=>{auditOffset+=pageSize;loadAudit();});
+
 function msg(id,text,type=""){const el=$(id);el.textContent=text;el.className="message"+(type?" "+type:"");}
 async function api(path,options={}){
  const response=await fetch(API_BASE+path,{method:options.method||"GET",credentials:"include",headers:options.body?{"Content-Type":"application/json"}:{},body:options.body?JSON.stringify(options.body):undefined});
@@ -136,7 +176,7 @@ async function archiveRecord(id){
 }
 $("login-form").addEventListener("submit",async event=>{
  event.preventDefault();if(!API_BASE){msg("login-message","Admin sign-in is not active until the backend is configured.","error");return;}
- try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();await loadDiscoverySummary();}
+ try{await api("/api/auth/login",{method:"POST",body:{email:$("email").value.trim(),password:$("password").value}});const me=await api("/api/auth/me");if(me.user.role!=="admin")throw new Error("This account does not have administrator permissions.");loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");await loadRecordsWithDiscovery();await loadDiscoverySummary();await loadUsers();await loadAudit();}
  catch(error){msg("login-message",error.message,"error");}
 });
 form.addEventListener("submit",async event=>{
