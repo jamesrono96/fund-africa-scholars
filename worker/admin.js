@@ -105,6 +105,47 @@ export async function handleAdmin(request, env, url) {
   const admin = await adminUser(request, env.DB);
   if (!admin) return json({ error: "Administrator access required." }, 403);
 
+  if (url.pathname === "/api/admin/users" && request.method === "GET") {
+    const limitValue = Number.parseInt(url.searchParams.get("limit") || "25", 10);
+    const offsetValue = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+    if (!Number.isInteger(limitValue) || limitValue < 1 || limitValue > 100 ||
+        !Number.isInteger(offsetValue) || offsetValue < 0 || offsetValue > 100000) {
+      return json({ error: "Use a limit from 1 to 100 and a non-negative offset." }, 400);
+    }
+    const result = await env.DB.prepare(`
+      SELECT u.id, u.email, u.full_name, u.country_of_residence, u.role,
+             u.email_verified_at, u.created_at,
+             m.status AS membership_status, m.membership_type, m.starts_at AS membership_starts_at
+      FROM users u
+      LEFT JOIN memberships m ON m.user_id = u.id
+      ORDER BY u.created_at DESC LIMIT ? OFFSET ?
+    `).bind(limitValue + 1, offsetValue).all();
+    const rows = result.results || [];
+    const hasMore = rows.length > limitValue;
+    return json({ users: hasMore ? rows.slice(0, limitValue) : rows,
+      count: Math.min(rows.length, limitValue), limit: limitValue, offset: offsetValue, has_more: hasMore });
+  }
+
+  if (url.pathname === "/api/admin/audit-logs" && request.method === "GET") {
+    const limitValue = Number.parseInt(url.searchParams.get("limit") || "50", 10);
+    const offsetValue = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+    if (!Number.isInteger(limitValue) || limitValue < 1 || limitValue > 100 ||
+        !Number.isInteger(offsetValue) || offsetValue < 0 || offsetValue > 100000) {
+      return json({ error: "Use a limit from 1 to 100 and a non-negative offset." }, 400);
+    }
+    const result = await env.DB.prepare(`
+      SELECT a.id, a.action, a.target_type, a.target_id, a.details_json, a.created_at,
+             u.email AS actor_email, u.full_name AS actor_name
+      FROM audit_logs a
+      LEFT JOIN users u ON u.id = a.actor_user_id
+      ORDER BY a.created_at DESC, a.id DESC LIMIT ? OFFSET ?
+    `).bind(limitValue + 1, offsetValue).all();
+    const rows = result.results || [];
+    const hasMore = rows.length > limitValue;
+    return json({ audit_logs: hasMore ? rows.slice(0, limitValue) : rows,
+      count: Math.min(rows.length, limitValue), limit: limitValue, offset: offsetValue, has_more: hasMore });
+  }
+
   if (url.pathname === "/api/admin/scholarships" && request.method === "GET") {
     const result = await env.DB.prepare("SELECT id, title, provider, destination_country, study_levels, subject_areas, funding_type, funding_details, eligibility_summary, application_deadline, official_url, source_checked_at, verification_status, publication_status, created_at, updated_at FROM scholarships ORDER BY updated_at DESC LIMIT 200").all();
     return json({ scholarships: result.results || [] });
