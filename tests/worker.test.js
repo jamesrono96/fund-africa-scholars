@@ -511,3 +511,23 @@ test("public scholarship pagination rejects invalid offsets", async () => {
   assert.equal(response.status, 400);
   assert.equal(db.statements.length, 0);
 });
+
+
+test("API responses include baseline browser security headers", async () => {
+  const response = await worker.fetch(request("/api/health"), {
+    DB: new MockD1(), APP_ENV: "test"
+  });
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000");
+  assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
+  assert.equal(response.headers.get("referrer-policy"), "same-origin");
+});
+
+test("delegated student responses retain baseline security headers", async () => {
+  const response = await worker.fetch(request("/api/student/saved"), { DB: new MockD1() });
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000");
+});
