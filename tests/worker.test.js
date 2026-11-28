@@ -584,10 +584,21 @@ test("admin user directory is authenticated, paginated and includes membership s
 });
 
 test("admin user directory rejects invalid pagination", async () => {
-  const response = await worker.fetch(request("/api/admin/users?limit=500"), {
+  class AuthDB extends MockD1 {
+    prepare(sql) {
+      const prepared = {
+        bind: () => prepared,
+        first: async () => sql.includes("FROM sessions JOIN users") ? { id: "admin-1", role: "admin" } : null,
+        all: async () => ({ results: [] }),
+        run: async () => ({ meta: { changes: 0 } })
+      };
+      return prepared;
+    }
+  }
+  const response = await worker.fetch(request("/api/admin/users?limit=500", {
     headers: { cookie: "fas_session=admin-token" }
-  }, { DB: new MockD1() });
-  assert.equal(response.status, 403);
+  }), { DB: new AuthDB() });
+  assert.equal(response.status, 400);
 });
 
 test("admin audit log is authenticated and returns actor context", async () => {
