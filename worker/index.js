@@ -326,7 +326,7 @@ export default {
         return withCors(response, cors);
       }
 
-      if (url.pathname.startsWith("/api/admin/scholarships")) {
+      if (url.pathname.startsWith("/api/admin/")) {
         const response = await handleAdmin(request, env, url);
         return withCors(response, cors);
       }
