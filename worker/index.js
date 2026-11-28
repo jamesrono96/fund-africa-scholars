@@ -266,9 +266,20 @@ async function authLogout(request, env) {
   return json({ ok: true }, 200, { "set-cookie": sessionCookie("", 0) });
 }
 
+export async function cleanupExpiredSessions(db, now = new Date()) {
+  if (!db) return { skipped: true, deleted: 0 };
+  const result = await db.prepare(
+    "DELETE FROM sessions WHERE expires_at <= ?"
+  ).bind(now.toISOString()).run();
+  return { skipped: false, deleted: result.meta?.changes ?? 0 };
+}
+
 export default {
   async scheduled(_controller, env, context) {
-    context.waitUntil(runScheduledDiscovery(env, 5));
+    context.waitUntil(Promise.all([
+      runScheduledDiscovery(env, 5),
+      cleanupExpiredSessions(env.DB)
+    ]));
   },
   async fetch(request, env) {
     const url = new URL(request.url);
